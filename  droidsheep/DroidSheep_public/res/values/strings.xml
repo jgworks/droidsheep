@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">DroidSheep</string>
+    <string name="license">DroidSheep comes with absolutely no warranty.\n\nYou use this software on your own risk.\nThe developer is not responsible for any damages caused by DroidSheep or it´s usage.\nIt´s only the users responsibility to check his countrys laws in order to make sure that the usage of DroidSheep is permitted by law in his country. In some countries stealing someones identity might be prohibited by law.\n\nAlways think about what you´re doing! Stealing someons identity can cause real trouble for him and maybe for you\n</string>
+    <string name="accept">I understand and accept the disclaimer</string>
+    <string name="button_stop">Stop</string>
+	<string name="button_start">Start</string>
+	<string name="label_running">RUNNING</string>
+	<string name="label_not_running">IDLE</string>
+	<string name="label_wpa_network">WPA encrypted!</string>
+	<string name="label_wep_network">WEP encrypted!</string>
+	<string name="label_open_network">Network is NOT encrypted</string>
+	<string name="label_networkname_pref">Connected to </string>
+	<string name="label_status_connected">Network status: CONNECTED</string>
+	<string name="label_status_disconnected">Network status: DISCONNECTED</string>
+	<string name="notification_title">New Session has been captured</string>
+	<string name="notification_text">Tap to open DroidSheep!</string>
+	<string name="toast_wifi_lost">Wifi connection lost or changed. Stopped Listening!</string>
+	<string name="toast_process_running_text">Process already running</string>
+	<string name="menu_open_normal">Open normal site</string>
+	<string name="menu_open_mobile">Open mobile site</string>
+	<string name="menu_remove_from_list">Remove from list</string>
+	<string name="menu_choose_page_title">Choose page type:</string>
+	<string name="menu_wifilist">Choose WiFi</string>
+	<string name="menu_clear_sessionlist">Clear list</string>
+	<string name="menu_exit">Exit</string>
+	<string name="accept_text">You must accept this disclaimer in order to use DroidSheep!</string>
+</resources>
