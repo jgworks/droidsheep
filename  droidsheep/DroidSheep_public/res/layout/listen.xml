@@ -5,6 +5,12 @@
 	android:layout_height="fill_parent"
 	android:padding="10px"
 	android:orientation="vertical">
+	<Button
+		android:layout_width="fill_parent"
+		android:id="@+id/bspoof"
+		android:layout_height="wrap_content"
+		android:enabled="true"
+		android:text="start ARP spoofing"></Button>
 	<TextView
 		android:text="TEST"
 		android:id="@+id/networkname"
@@ -12,7 +18,6 @@
 		android:lines="1"
 		android:textStyle="bold"
 		android:textColor="#FFFFFF"
-		android:textSize="20sp"
 		android:gravity="center_horizontal"
 		android:singleLine="true"
 		android:layout_width="fill_parent"
@@ -48,9 +53,10 @@
 		android:layout_height="wrap_content"
 		android:id="@+id/linearLayout1"
 		android:gravity="center">
-		<ProgressBar android:id="@+id/progressBar1"
-			android:visibility="invisible" 
-			android:layout_width="wrap_content" 
+		<ProgressBar
+			android:id="@+id/progressBar1"
+			android:visibility="invisible"
+			android:layout_width="wrap_content"
 			android:layout_height="fill_parent"></ProgressBar>
 		<TextView
 			android:text="TEST"

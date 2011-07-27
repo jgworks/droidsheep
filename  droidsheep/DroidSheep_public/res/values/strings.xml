@@ -6,6 +6,8 @@
     <string name="button_stop">Stop</string>
 	<string name="button_start">Start</string>
 	<string name="label_running">RUNNING</string>
+	<string name="label_running_and_spoofing">RUNNING AND SPOOFING</string>
+	<string name="label_not_running_and_spoofing">SPOOFING ONLY</string>
 	<string name="label_not_running">IDLE</string>
 	<string name="label_wpa_network">WPA encrypted!</string>
 	<string name="label_wep_network">WEP encrypted!</string>

@@ -1,3 +1,23 @@
+/*    	ListenThread.java encapsulates the native binary and polls for cookies 
+    	Copyright (C) 2011 Andreas Koch <koch.trier@gmail.com>
+    	
+    	This software was supported by the University of Trier 
+
+	    This program is free software; you can redistribute it and/or modify
+	    it under the terms of the GNU General Public License as published by
+	    the Free Software Foundation; either version 3 of the License, or
+	    (at your option) any later version.
+	
+	    This program is distributed in the hope that it will be useful,
+	    but WITHOUT ANY WARRANTY; without even the implied warranty of
+	    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	    GNU General Public License for more details.
+	
+	    You should have received a copy of the GNU General Public License along
+	    with this program; if not, write to the Free Software Foundation, Inc.,
+	    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
+
+
 package de.trier.infsec.koch.droidsheep.thread;
 
 import java.io.BufferedReader;
@@ -11,7 +31,9 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
+import android.widget.Toast;
 import de.trier.infsec.koch.droidsheep.activities.ListenActivity;
+import de.trier.infsec.koch.droidsheep.arpspoof.RootAccess;
 import de.trier.infsec.koch.droidsheep.auth.Auth;
 import de.trier.infsec.koch.droidsheep.auth.AuthHelper;
 import de.trier.infsec.koch.droidsheep.helper.SystemHelper;
@@ -22,7 +44,7 @@ public class ListenThread extends Thread {
 	
 	public static final String CLEANUP_COMMAND = "killall droidsheep\n";
 	
-	static Process tcpDumpProcess = null;
+	static Process droidSheepProcess = null;
 	static ListenThread singleton = null;
 	static InputStream inputStream = null;
 	static OutputStream outputStream = null;
@@ -51,6 +73,10 @@ public class ListenThread extends Thread {
 		startProcess();
 		AuthHelper.init(context);
 		
+		if (inputStream == null) {
+			reset();
+			return;
+		}
 		BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
 		String line = null;
 //		WifiManager wm = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
@@ -91,11 +117,14 @@ public class ListenThread extends Thread {
 
 	private void startProcess() {
 		try {
-			tcpDumpProcess = new ProcessBuilder().command("su").redirectErrorStream(true).start();
-			inputStream = tcpDumpProcess.getInputStream();
-			outputStream = tcpDumpProcess.getOutputStream();
-			System.out.println((SystemHelper.getBinaryPath(context) + " \n").getBytes("ASCII"));
-			outputStream.write((SystemHelper.getBinaryPath(context) + " \n").getBytes("ASCII"));
+			if (!RootAccess.isGranted()) {
+				Toast.makeText(context, "This software works on rooted phones ONLY! - It will crash if the phone is not rooted!", Toast.LENGTH_LONG).show();
+			}
+			droidSheepProcess = new ProcessBuilder().command("su").redirectErrorStream(true).start();
+			inputStream = droidSheepProcess.getInputStream();
+			outputStream = droidSheepProcess.getOutputStream();
+			System.out.println((SystemHelper.getDroidSheepBinaryPath(context) + " \n").getBytes("ASCII"));
+			outputStream.write((SystemHelper.getDroidSheepBinaryPath(context) + " \n").getBytes("ASCII"));
 			outputStream.flush();
 		} catch (IOException e) {
 			e.printStackTrace();

