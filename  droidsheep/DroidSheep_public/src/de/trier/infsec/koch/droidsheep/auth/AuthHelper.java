@@ -31,11 +31,15 @@ import android.content.Context;
 import android.content.res.XmlResourceParser;
 import android.util.Log;
 import de.trier.infsec.koch.droidsheep.R;
+import de.trier.infsec.koch.droidsheep.activities.ListenActivity;
+import de.trier.infsec.koch.droidsheep.helper.DBHelper;
 
 public class AuthHelper {
 
 	static HashMap<String, AuthDefinition> authDefList = new HashMap<String, AuthDefinition>();
+	static AuthDefinition generic = null;
 	static String binaryPath = null;
+	static HashMap<String, Object> blacklist = null;
 
 	public static void init(Context c) {
 		try {
@@ -46,6 +50,7 @@ public class AuthHelper {
 	}
 
 	private static void readConfig(Context c) throws XmlPullParserException, IOException {
+		blacklist = DBHelper.getBlacklist(c);
 		XmlResourceParser xpp = c.getResources().getXml(R.xml.auth);
 		
 		xpp.next();
@@ -91,6 +96,9 @@ public class AuthHelper {
 			}
 			eventType = xpp.next();
 		}
+		if (ListenActivity.generic) {
+			generic = new AuthDefinitionGeneric();
+		}
 	}
 
 	public static Auth match(String line) {
@@ -99,10 +107,32 @@ public class AuthHelper {
 			Auth a = ad.getAuthFromCookieString(line);
 			if (a != null) {
 				Log.d("FS", "MATCH:" + a.getName());
+				if (blacklist.containsKey(a.getName())) {
+					return null;
+				}
 				return a;
 			}
 		}
+		if (ListenActivity.generic && generic != null) {
+			Auth a = generic.getAuthFromCookieString(line);
+			if (a == null || a.getName() == null) {
+				return null;
+			}
+			if (blacklist.containsKey(a.getName())) {
+				return null;
+			}
+			return a;
+		}
 		return null;
+	}
+
+	public static void addToBlackList(Context c, String name) {
+		blacklist.put(name, null);
+		DBHelper.addBlacklistEntry(c, name);
+	}
+
+	public static void clearBlacklist() {
+		blacklist.clear();
 	}
 	
 }

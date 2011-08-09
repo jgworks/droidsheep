@@ -45,19 +45,19 @@
 		<cookiename>T</cookiename>
 		<cookiename>Y</cookiename>
 	</auth>
-	<auth>
+<!-- 	<auth>
 		<name>Wer-kennt-wen</name>
 		<domain>wer-kennt-wen.de</domain>
 		<url>http://www.wer-kennt-wen.de</url>
 		<cookiename>WKWSESSID</cookiename>
 		<cookiename>WKWSID</cookiename>
-	</auth>
-	<auth>
+	</auth> -->
+<!-- 	<auth>
 		<name>Windows live</name>
 		<domain>live.com</domain>
 		<url>http://mail.live.com</url>
 		<cookiename>RPSTAuth</cookiename>
-	</auth>
+	</auth> -->
 	<auth>
 		<name>Google</name>
 		<domain>google.de</domain>

@@ -44,6 +44,10 @@ public class AuthDefinition {
 	}	
 	
 	public Auth getAuthFromCookieString(String cookieListString) {
+		String[] lst = cookieListString.split("\\|\\|\\|");
+		if (lst.length < 2) return null;
+		cookieListString = lst[0];
+		
 		ArrayList<CookieWrapper> cookieList = new ArrayList<CookieWrapper>();
 		String[] cookies = cookieListString.split(";");
 		for (String cookieString : cookies) {
@@ -68,7 +72,7 @@ public class AuthDefinition {
 			}
 		}
 		if (cookieList != null && !cookieList.isEmpty() && cookieList.size() == cookieNames.size()) {
-			return new Auth(cookieList, url, mobileurl);
+			return new Auth(cookieList, url, mobileurl, false);
 		}
 		return null;
 	}

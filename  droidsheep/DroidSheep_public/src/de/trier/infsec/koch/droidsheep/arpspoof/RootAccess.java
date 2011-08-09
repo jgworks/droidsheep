@@ -4,19 +4,22 @@ import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.Set;
-import java.util.HashSet;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 import android.util.Log;
-/*based on RootTools' isAccessGiven function from http://code.google.com/p/roottools/ written by stericson (no copyright notice was found) 
- *Rewritten by Robbie Clemons on June 1, 2011 */
+
+/*
+ * based on RootTools' isAccessGiven function from
+ * http://code.google.com/p/roottools/ written by stericson (no copyright notice
+ * was found)Rewritten by Robbie Clemons on June 1, 2011
+ */
 public class RootAccess {
-	
+
 	private static final String TAG = "RootAccess";
 
 	public static boolean isGranted() {
-
 		Process process = null;
 		DataOutputStream os = null;
 		InputStreamReader osRes = null;

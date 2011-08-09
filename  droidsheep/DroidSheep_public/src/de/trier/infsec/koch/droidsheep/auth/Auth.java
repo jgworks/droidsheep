@@ -30,10 +30,12 @@ public class Auth {
 	String url = null;
 	String mobileurl = null;
 	String id = null;
+	boolean generic = true;
 	
-	public Auth(ArrayList<CookieWrapper> cookieList, String url, String mobileUrl) {
+	public Auth(ArrayList<CookieWrapper> cookieList, String url, String mobileUrl, boolean generic) {
 		this.cookieList = cookieList;
 		this.mobileurl = mobileUrl;
+		this.generic = generic;
 		this.url = url;
 		
 		int id = 0;
@@ -64,7 +66,9 @@ public class Auth {
 	}
 	
 	
-	
+	public boolean isGeneric() {
+		return generic;
+	}
 	
 
 }

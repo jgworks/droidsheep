@@ -36,6 +36,7 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 import de.trier.infsec.koch.droidsheep.R;
 import de.trier.infsec.koch.droidsheep.auth.Auth;
 import de.trier.infsec.koch.droidsheep.objects.CookieWrapper;
@@ -140,13 +141,20 @@ public class HijackActivity extends Activity {
 	@Override
 	protected void onStart() {
 		super.onStart();
-
 		String key = this.getIntent().getExtras().getString("ID");
 		this.authToHijack = ListenActivity.authList.get(key);
+
+		if (authToHijack == null) {
+			Toast.makeText(this, "Sorry, there was an error loading this Authentication", Toast.LENGTH_LONG).show();
+			finish();
+			return;
+		}
+
 		boolean mobile = this.getIntent().getExtras().getBoolean("MOBILE");
 		String url = mobile?authToHijack.getMobileUrl():authToHijack.getUrl();
 
 		setupWebView();
+		getWindow().requestFeature(Window.FEATURE_PROGRESS);
 		getWindow().requestFeature(Window.FEATURE_PROGRESS);
 		setContentView(R.layout.webview);
 		LinearLayout layout = (LinearLayout) findViewById(R.id.hijack);

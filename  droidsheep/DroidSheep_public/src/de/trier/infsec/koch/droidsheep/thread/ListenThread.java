@@ -31,9 +31,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
-import android.widget.Toast;
 import de.trier.infsec.koch.droidsheep.activities.ListenActivity;
-import de.trier.infsec.koch.droidsheep.arpspoof.RootAccess;
 import de.trier.infsec.koch.droidsheep.auth.Auth;
 import de.trier.infsec.koch.droidsheep.auth.AuthHelper;
 import de.trier.infsec.koch.droidsheep.helper.SystemHelper;
@@ -48,8 +46,6 @@ public class ListenThread extends Thread {
 	static ListenThread singleton = null;
 	static InputStream inputStream = null;
 	static OutputStream outputStream = null;
-
-	public static String actualOutput = "";
 
 	private Context context = null;
 	private Handler handler = null;
@@ -69,6 +65,12 @@ public class ListenThread extends Thread {
 	
 	@Override
 	public void run() {
+		Message message = handler.obtainMessage();
+		Bundle b = new Bundle();
+		b.putString(ListenActivity.BUNDLE_KEY_NOROOT, ListenActivity.BUNDLE_KEY_NOROOT);
+		message.setData(b);
+		handler.sendMessage(message);
+		
 		running = true;
 		startProcess();
 		AuthHelper.init(context);
@@ -90,12 +92,11 @@ public class ListenThread extends Thread {
 					continue;
 				}
 				
-				Log.d("FS", line);
+				Log.d(ListenActivity.APPLICATION_TAG, line);
 				String[] lst = line.split(";");
 				for (String cookieString : lst) {
-					Log.d("FS", cookieString);
+					Log.d(ListenActivity.APPLICATION_TAG, cookieString);
 				}
-				actualOutput = line;
 				Auth a = AuthHelper.match(line);
 				if (a != null) {
 					ListenActivity.authList.put(a.getId(), a);
@@ -107,7 +108,7 @@ public class ListenThread extends Thread {
 					handler.sendMessage(m);
 				}
 			} catch (Exception e) {
-				Log.e("FS", "FS", e);
+				Log.e(ListenActivity.APPLICATION_TAG, "Exception: ", e);
 				cleanUp();
 				break;
 			}
@@ -117,9 +118,6 @@ public class ListenThread extends Thread {
 
 	private void startProcess() {
 		try {
-			if (!RootAccess.isGranted()) {
-				Toast.makeText(context, "This software works on rooted phones ONLY! - It will crash if the phone is not rooted!", Toast.LENGTH_LONG).show();
-			}
 			droidSheepProcess = new ProcessBuilder().command("su").redirectErrorStream(true).start();
 			inputStream = droidSheepProcess.getInputStream();
 			outputStream = droidSheepProcess.getOutputStream();

@@ -27,15 +27,12 @@ import java.io.InputStream;
 import android.content.Context;
 import android.util.Log;
 import de.trier.infsec.koch.droidsheep.R;
-import de.trier.infsec.koch.droidsheep.arpspoof.RootAccess;
 
 public class SetupHelper {
 
 	public static void checkPrerequisites(Context c) {
 
-		if (!RootAccess.isGranted()) {
-			// TODO TOAS
-		}
+		
 		
 		InputStream inDroidSheep = c.getResources().openRawResource(R.raw.droidsheep);
 		InputStream inARPSpoof = c.getResources().openRawResource(R.raw.arpspoof);

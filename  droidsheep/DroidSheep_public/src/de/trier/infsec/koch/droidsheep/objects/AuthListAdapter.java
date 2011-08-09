@@ -22,6 +22,7 @@ package de.trier.infsec.koch.droidsheep.objects;
 import java.util.Hashtable;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -76,6 +77,13 @@ public class AuthListAdapter extends BaseAdapter {
         ImageView 	imgView = (ImageView) 	itemLayout.findViewById(R.id.image);
         
         tv1.setText(auth.getName());
+
+        if (auth.isGeneric()) {
+        	tv1.setTextColor(Color.YELLOW);
+        } else {
+        	tv1.setTextColor(Color.GREEN);
+        }
+
         tv2.setText(auth.getId());
         
         if (auth.getName().equals(FACEBOOK)) {

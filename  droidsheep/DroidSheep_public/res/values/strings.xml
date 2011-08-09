@@ -2,6 +2,7 @@
 <resources>
     <string name="app_name">DroidSheep</string>
     <string name="license">DroidSheep comes with absolutely no warranty.\n\nYou use this software on your own risk.\nThe developer is not responsible for any damages caused by DroidSheep or it´s usage.\nIt´s only the users responsibility to check his countrys laws in order to make sure that the usage of DroidSheep is permitted by law in his country. In some countries stealing someones identity might be prohibited by law.\n\nAlways think about what you´re doing! Stealing someons identity can cause real trouble for him and maybe for you\n</string>
+    <string name="unrooted">YOUR PHONE SEEMS NOT TO BE ROOTED\n\nDroidSheep can only run on phones having superuser access enabled. DroidSheep will not run on your phone and will exit now. Sorry.</string>
     <string name="accept">I understand and accept the disclaimer</string>
     <string name="button_stop">Stop</string>
 	<string name="button_start">Start</string>
@@ -19,12 +20,19 @@
 	<string name="notification_text">Tap to open DroidSheep!</string>
 	<string name="toast_wifi_lost">Wifi connection lost or changed. Stopped Listening!</string>
 	<string name="toast_process_running_text">Process already running</string>
-	<string name="menu_open_normal">Open normal site</string>
+	<string name="menu_black_list">Add host to blacklist</string>
 	<string name="menu_open_mobile">Open mobile site</string>
+	<string name="menu_open_normal">Open site</string>
 	<string name="menu_remove_from_list">Remove from list</string>
 	<string name="menu_choose_page_title">Choose page type:</string>
 	<string name="menu_wifilist">Choose WiFi</string>
 	<string name="menu_clear_sessionlist">Clear list</string>
+	<string name="menu_enable_generic">Enable Generic mode</string>
+	<string name="menu_disable_generic">Disable Generic mode</string>
 	<string name="menu_exit">Exit</string>
+	<string name="clear_blacklist">Do you really want to delete all hosts from blacklist?</string>
+	<string name="menu_blacklist_clear">Clear Blacklist</string>
+	<string name="clear_blacklist_ok">Yes</string>
+	<string name="clear_blacklist_abprt">Abort</string>
 	<string name="accept_text">You must accept this disclaimer in order to use DroidSheep!</string>
 </resources>

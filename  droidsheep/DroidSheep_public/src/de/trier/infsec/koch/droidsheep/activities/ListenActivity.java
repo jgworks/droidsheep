@@ -1,21 +1,23 @@
-/*    	ListenActivity.java is the starting Activity, listening for cookies
-    	Copyright (C) 2011 Andreas Koch <koch.trier@gmail.com>
-    	
-    	This software was supported by the University of Trier 
-
-	    This program is free software; you can redistribute it and/or modify
-	    it under the terms of the GNU General Public License as published by
-	    the Free Software Foundation; either version 3 of the License, or
-	    (at your option) any later version.
-	
-	    This program is distributed in the hope that it will be useful,
-	    but WITHOUT ANY WARRANTY; without even the implied warranty of
-	    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-	    GNU General Public License for more details.
-	
-	    You should have received a copy of the GNU General Public License along
-	    with this program; if not, write to the Free Software Foundation, Inc.,
-	    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
+/*
+ * ListenActivity.java is the starting Activity, listening for cookies Copyright
+ * (C) 2011 Andreas Koch <koch.trier@gmail.com>
+ * 
+ * This software was supported by the University of Trier
+ * 
+ * This program is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License as published by the Free Software
+ * Foundation; either version 3 of the License, or (at your option) any later
+ * version.
+ * 
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
+ * 
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, write to the Free Software Foundation, Inc., 51
+ * Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 package de.trier.infsec.koch.droidsheep.activities;
 
@@ -65,8 +67,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 import de.trier.infsec.koch.droidsheep.R;
 import de.trier.infsec.koch.droidsheep.arpspoof.ArpspoofService;
+import de.trier.infsec.koch.droidsheep.arpspoof.RootAccess;
 import de.trier.infsec.koch.droidsheep.auth.Auth;
 import de.trier.infsec.koch.droidsheep.auth.AuthHelper;
+import de.trier.infsec.koch.droidsheep.helper.DBHelper;
 import de.trier.infsec.koch.droidsheep.helper.SetupHelper;
 import de.trier.infsec.koch.droidsheep.helper.SystemHelper;
 import de.trier.infsec.koch.droidsheep.objects.SessionListView;
@@ -78,44 +82,51 @@ public class ListenActivity extends Activity implements OnClickListener, OnItemC
 	public static Hashtable<String, Auth> authList = new Hashtable<String, Auth>();
 	public static boolean disclaimerAccepted = false;
 
-	private SessionListView 	sessionListView;
-	private TextView 			tstatus;
-	private TextView 			tnetworkConnected;
-	private TextView 			tnetworkName;
-	private TextView 			tnetworkEncryption;
-	private ProgressBar 		pbrunning;
-	
-	private int 				sessionListViewSelected;
-	private String 				sessionListViewSelectedKey;
-	
-	private boolean 			networkConnected = false;
-	private boolean				networkEncryptionWPA = false;
-	private String	 			networkName = "";
+	private SessionListView sessionListView;
+	private TextView tstatus;
+	private TextView tnetworkConnected;
+	private TextView tnetworkName;
+	private TextView tnetworkEncryption;
+	private ProgressBar pbrunning;
 
-	public static final String 	BUNDLE_KEY_TYPE 			= "TYPE";
-	public static final String 	BUNDLE_TYPE_WIFICHANGE 		= "WIFICHANGE";
-	public static final String	BUNDLE_TYPE_NEWAUTH 		= "NEWAUTH";
-	public static final String 	BUNDLE_KEY_ID 				= "ID";
-	public static final String 	BUNDLE_KEY_MOBILE 			= "MOBILE";
-	public static final String 	BUNDLE_KEY_AUTH				= "AUTH";
+	private int sessionListViewSelected;
+	private String sessionListViewSelectedKey;
 
+	private boolean networkConnected = false;
+	private boolean networkEncryptionWPA = false;
+	private String networkName = "";
 
-	public static final int		MENU_WIFILIST_ID  			= 0;
-	public static final int		MENU_CLEAR_SESSIONLIST_ID  	= 1;
-	public static final int		MENU_EXIT_ID				= 2;
-	
-	private static final int 	NOTIFICATION_ID 			= 4711;
+	public static final String BUNDLE_KEY_TYPE = "TYPE";
+	public static final String BUNDLE_TYPE_WIFICHANGE = "WIFICHANGE";
+	public static final String BUNDLE_TYPE_NEWAUTH = "NEWAUTH";
+	public static final String BUNDLE_KEY_ID = "ID";
+	public static final String BUNDLE_KEY_MOBILE = "MOBILE";
+	public static final String BUNDLE_KEY_AUTH = "AUTH";
+	public static final String BUNDLE_KEY_NOROOT = "NOROOT";
 
-	
+	public static final String APPLICATION_TAG = "DROIDSHEEP";
+
+	public static final int MENU_WIFILIST_ID = 0;
+	public static final int MENU_CLEAR_SESSIONLIST_ID = 1;
+	public static final int MENU_EXIT_ID = 2;
+	public static final int MENU_GENERIC = 3;
+	public static final int MENU_CLEAR_BLACKLIST_ID = 4;
+
+	private static final int NOTIFICATION_ID = 4711;
+	public static boolean unrooted = false;
+
 	private int lastNotification = 0;
 	private NotificationManager mNotificationManager = null;
 	
+	public static boolean generic = true;
+
 	private Handler handler = new Handler() {
 		@Override
 		public synchronized void handleMessage(Message msg) {
 			String type = msg.getData().getString(BUNDLE_KEY_TYPE);
 			if (type != null && type.equals(BUNDLE_TYPE_WIFICHANGE)) {
-				if (!ListenThread.running) return;
+				if (!ListenThread.running)
+					return;
 				Toast t = Toast.makeText(getApplicationContext(), getString(R.string.toast_wifi_lost), Toast.LENGTH_SHORT);
 				t.show();
 				stop();
@@ -128,24 +139,29 @@ public class ListenActivity extends Activity implements OnClickListener, OnItemC
 		};
 	};
 
-
-	
-	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		SetupHelper.checkPrerequisites(this.getApplicationContext());
-		AuthHelper.init(this.getApplicationContext());
-		WifiChangeChecker wi = new WifiChangeChecker(handler);
-		this.getApplicationContext().registerReceiver(wi, new IntentFilter(WifiManager.WIFI_STATE_CHANGED_ACTION));
+		if (!RootAccess.isGranted()) {
+			showUnrooted();
+			unrooted = true;
+		} else {
+			SetupHelper.checkPrerequisites(this.getApplicationContext());
+			AuthHelper.init(this.getApplicationContext());
+			WifiChangeChecker wi = new WifiChangeChecker(handler);
+			this.getApplicationContext().registerReceiver(wi, new IntentFilter(WifiManager.WIFI_STATE_CHANGED_ACTION));
+		}
 	}
 
 	@Override
 	protected void onStart() {
+		super.onStart();
+		if (unrooted)
+			return;
 		setContentView(R.layout.listen);
 		Button button = (Button) findViewById(R.id.bstartstop);
 		Button buttonSpoof = (Button) findViewById(R.id.bspoof);
-		
+
 		button.setOnClickListener(this);
 		buttonSpoof.setOnClickListener(this);
 		if (ListenThread.running) {
@@ -162,18 +178,19 @@ public class ListenActivity extends Activity implements OnClickListener, OnItemC
 		this.sessionListView = ((SessionListView) findViewById(R.id.sessionlist));
 		this.sessionListView.setOnItemClickListener(this);
 		this.sessionListView.setOnCreateContextMenuListener(this);
-		super.onStart();
+
 		mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+		ListenActivity.generic = DBHelper.getGeneric(this);
 		showDisclaimer();
 	}
-	
-	
+
 	private void showDisclaimer() {
-		if (disclaimerAccepted) return;
-		
+		if (disclaimerAccepted)
+			return;
+
 		LayoutInflater inflater = (LayoutInflater) getApplicationContext().getSystemService(LAYOUT_INFLATER_SERVICE);
 		final View layout = inflater.inflate(R.layout.disclaimer, (ViewGroup) findViewById(R.id.layout_root));
-		
+
 		AlertDialog al = new AlertDialog(this) {
 			@Override
 			public boolean onSearchRequested() {
@@ -198,35 +215,62 @@ public class ListenActivity extends Activity implements OnClickListener, OnItemC
 		al.show();
 	}
 
-//	public void getUserInfo(Auth auth) {
-//	    // Create a new HttpClient and Post Header
-//	    HttpClient httpclient = new DefaultHttpClient();
-//	    HttpPost httppost = new HttpPost(auth.getUrl());
-//	    
-//	    List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
-//	    for (CookieWrapper c : auth.getCookies()) {
-//	    	nameValuePairs.add(new BasicNameValuePair(c.getCookie().getName(), c.getCookie().getValue()));
-//	    }
-//	    
-//	    try {
-//			httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
-//			HttpResponse response = httpclient.execute(httppost);
-//			int i = 0;
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//		}
-//	}
+	private void showUnrooted() {
+		LayoutInflater inflater = (LayoutInflater) getApplicationContext().getSystemService(LAYOUT_INFLATER_SERVICE);
+		final View layout = inflater.inflate(R.layout.unrooted, (ViewGroup) findViewById(R.id.layout_root));
+
+		AlertDialog al = new AlertDialog(this) {
+			@Override
+			public boolean onSearchRequested() {
+				return false;
+			}
+		};
+		al.setView(layout);
+		al.setButton("OK", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				finish();
+			}
+		});
+		al.setCancelable(false);
+		al.show();
+	}
+
+	//	public void getUserInfo(Auth auth) {
+	//	    // Create a new HttpClient and Post Header
+	//	    HttpClient httpclient = new DefaultHttpClient();
+	//	    HttpPost httppost = new HttpPost(auth.getUrl());
+	//	    
+	//	    List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
+	//	    for (CookieWrapper c : auth.getCookies()) {
+	//	    	nameValuePairs.add(new BasicNameValuePair(c.getCookie().getName(), c.getCookie().getValue()));
+	//	    }
+	//	    
+	//	    try {
+	//			httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+	//			HttpResponse response = httpclient.execute(httppost);
+	//			int i = 0;
+	//		} catch (IOException e) {
+	//			e.printStackTrace();
+	//		}
+	//	}
 
 	@Override
 	protected void onResume() {
 		super.onResume();
+		if (unrooted)
+			return;
 		refresh();
 		mNotificationManager.cancelAll();
 	}
 
 	@Override
 	protected void onDestroy() {
-		cleanup();
+		try {
+			cleanup();
+		} catch (Exception e) {
+			Log.e(ListenActivity.APPLICATION_TAG, "Error while onDestroy", e);
+		}
 		super.onDestroy();
 	}
 
@@ -236,6 +280,7 @@ public class ListenActivity extends Activity implements OnClickListener, OnItemC
 		sessionListViewSelectedKey = (String) authList.keySet().toArray()[position];
 		sessionListView.showContextMenuForChild(view);
 	}
+	
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
@@ -253,6 +298,13 @@ public class ListenActivity extends Activity implements OnClickListener, OnItemC
 			mNotificationManager.cancelAll();
 			finish();
 			break;
+		case MENU_GENERIC:
+			generic = !generic;
+			DBHelper.setGeneric(this, generic);
+			break;
+		case MENU_CLEAR_BLACKLIST_ID:
+			clearBlacklist();
+			break;
 		}
 		return false;
 	}
@@ -267,9 +319,15 @@ public class ListenActivity extends Activity implements OnClickListener, OnItemC
 			click(sessionListViewSelected, false);
 			break;
 		case SessionListView.ID_DELETE:
-			authList.remove(authList.keySet().toArray(new String[]{})[sessionListViewSelected]);
+			authList.remove(authList.keySet().toArray(new String[] {})[sessionListViewSelected]);
 			refresh();
 			break;
+		case SessionListView.ID_BLACKLIST:
+			Auth a = authList.get(authList.keySet().toArray(new String[] {})[sessionListViewSelected]);
+			AuthHelper.addToBlackList(this, a.getName());
+			authList.remove(a.getId());
+			refresh();
+		break;
 		}
 		return true;
 	}
@@ -289,20 +347,20 @@ public class ListenActivity extends Activity implements OnClickListener, OnItemC
 		}
 		refresh();
 	}
-	
+
 	private void startSpoofing() {
 		WifiManager wManager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
 		WifiInfo wInfo = wManager.getConnectionInfo();
 
 		//Check to see if we're connected to wifi
 		int localhost = wInfo.getIpAddress();
-		if(localhost != 0) {
-			String gatewayIP = "192.168.1.1";
+		if (localhost != 0) {
+			String gatewayIP = Formatter.formatIpAddress(wManager.getDhcpInfo().gateway);
 			String localhostIP = Formatter.formatIpAddress(localhost);
 			//If nothing was entered for the ip address use the gateway
-			if(gatewayIP.trim().equals(""))
+			if (gatewayIP.trim().equals(""))
 				gatewayIP = Formatter.formatIpAddress(wManager.getDhcpInfo().gateway);
-			
+
 			//determining wifi network interface
 			InetAddress localInet;
 			String interfaceName = null;
@@ -311,26 +369,25 @@ public class ListenActivity extends Activity implements OnClickListener, OnItemC
 				NetworkInterface wifiInterface = NetworkInterface.getByInetAddress(localInet);
 				interfaceName = wifiInterface.getDisplayName();
 			} catch (UnknownHostException e) {
-				Log.e("DroidSheep", "error getting localhost's InetAddress", e);
+				Log.e(ListenActivity.APPLICATION_TAG, "error getting localhost's InetAddress", e);
 			} catch (SocketException e) {
-				Log.e("DroidSheep", "error getting wifi network interface", e);
+				Log.e(ListenActivity.APPLICATION_TAG, "error getting wifi network interface", e);
 			}
-			
+
 			Intent intent = new Intent(this, ArpspoofService.class);
 			Bundle mBundle = new Bundle();
 			mBundle.putString("gateway", gatewayIP);
 			mBundle.putString("localBin", SystemHelper.getARPSpoofBinaryPath(this));
 			mBundle.putString("interface", interfaceName);
 			intent.putExtras(mBundle);
-			
+
 			startService(intent);
-		}
-		else {
+		} else {
 			CharSequence text = "Must be connected to wireless network.";
 			Toast.makeText(getApplicationContext(), text, Toast.LENGTH_LONG).show();
 		}
 	}
-	
+
 	public void stopSpoofing() {
 		Intent intent = new Intent(this, ArpspoofService.class);
 		stopService(intent);
@@ -340,37 +397,43 @@ public class ListenActivity extends Activity implements OnClickListener, OnItemC
 			e.printStackTrace();
 		}
 	}
-	
-	private boolean isSpoofing() {
-	    ActivityManager manager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
-	    for (RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
-	        if ("de.trier.infsec.koch.droidsheep.arpspoof.ArpspoofService".equals(service.service.getClassName())) {
-	            return true;
-	        }
-	    }
-	    return false;
-	}
 
+	private boolean isSpoofing() {
+		ActivityManager manager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
+		for (RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+			if ("de.trier.infsec.koch.droidsheep.arpspoof.ArpspoofService".equals(service.service.getClassName())) {
+				return true;
+			}
+		}
+		return false;
+	}
 
 	@Override
 	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
+		if (authList.get(sessionListViewSelectedKey) == null) {
+			return;
+		}
 		menu.setHeaderTitle(getString(R.string.menu_choose_page_title));
+		menu.add(ContextMenu.NONE, SessionListView.ID_NORMAL, ContextMenu.NONE, getString(R.string.menu_open_normal));
+		menu.add(ContextMenu.NONE, SessionListView.ID_DELETE, ContextMenu.NONE, getString(R.string.menu_remove_from_list));
+		menu.add(ContextMenu.NONE, SessionListView.ID_BLACKLIST, ContextMenu.NONE, getString(R.string.menu_black_list));
 		if (authList.get(sessionListViewSelectedKey).getMobileUrl() != null) {
 			menu.add(ContextMenu.NONE, SessionListView.ID_MOBILE, ContextMenu.NONE, getString(R.string.menu_open_mobile));
-			menu.add(ContextMenu.NONE, SessionListView.ID_NORMAL, ContextMenu.NONE, getString(R.string.menu_open_normal));
-			menu.add(ContextMenu.NONE, SessionListView.ID_DELETE, ContextMenu.NONE, getString(R.string.menu_remove_from_list));
-		} else {
-			menu.add(ContextMenu.NONE, SessionListView.ID_NORMAL, ContextMenu.NONE, getString(R.string.menu_open_normal));
-			menu.add(ContextMenu.NONE, SessionListView.ID_DELETE, ContextMenu.NONE, getString(R.string.menu_remove_from_list));
 		}
 	}
-	
 
 	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
+	public boolean onPrepareOptionsMenu(Menu menu) {
 		super.onCreateOptionsMenu(menu);
+		menu.clear();
 		menu.add(0, MENU_WIFILIST_ID, 0, getString(R.string.menu_wifilist));
 		menu.add(0, MENU_CLEAR_SESSIONLIST_ID, 0, getString(R.string.menu_clear_sessionlist));
+		if (ListenActivity.generic) {			
+			menu.add(0, MENU_GENERIC, 0, getString(R.string.menu_disable_generic));
+		} else {
+			menu.add(0, MENU_GENERIC, 0, getString(R.string.menu_enable_generic));
+		}
+		menu.add(0, MENU_CLEAR_BLACKLIST_ID, 0, getString(R.string.menu_blacklist_clear));
 		menu.add(0, MENU_EXIT_ID, 0, getString(R.string.menu_exit));
 		return true;
 	}
@@ -382,9 +445,6 @@ public class ListenActivity extends Activity implements OnClickListener, OnItemC
 		}
 		return super.onKeyDown(keyCode, event);
 	}
-	
-	
-	
 
 	public void click(int id, boolean mobilePage) {
 		if (authList.isEmpty()) {
@@ -402,7 +462,6 @@ public class ListenActivity extends Activity implements OnClickListener, OnItemC
 		startActivity(intent);
 	}
 
-
 	private void start() {
 		updateNetworkSettings();
 		if (!networkConnected) {
@@ -411,19 +470,21 @@ public class ListenActivity extends Activity implements OnClickListener, OnItemC
 		}
 
 		if (networkEncryptionWPA && !isSpoofing()) {
-			Toast.makeText(this.getApplicationContext(), "This network is WPA encrypted. ARP-Spoofing will be automaticalle enabled!", Toast.LENGTH_LONG).show();
+			Toast.makeText(this.getApplicationContext(),
+					"This network is WPA encrypted. ARP-Spoofing will be automaticalle enabled!", Toast.LENGTH_LONG).show();
 			startSpoofing();
 		}
-		
+
 		Button bstartstop = (Button) findViewById(R.id.bstartstop);
-	
+
 		if (!ListenThread.running) {
 			ListenThread.reset();
 			Thread t = ListenThread.getInstance(this.getApplicationContext(), handler);
 			t.start();
 			bstartstop.setText("Stop");
 		} else {
-			Toast t = Toast.makeText(this.getApplicationContext(), getString(R.string.toast_process_running_text), Toast.LENGTH_SHORT);
+			Toast t = Toast.makeText(this.getApplicationContext(), getString(R.string.toast_process_running_text),
+					Toast.LENGTH_SHORT);
 			t.show();
 		}
 		try {
@@ -459,12 +520,14 @@ public class ListenActivity extends Activity implements OnClickListener, OnItemC
 			tstatus.setTextColor(Color.GREEN);
 			tstatus.setTextSize(15);
 			pbrunning.setVisibility(ProgressBar.VISIBLE);
-		} else if (ListenThread.running && ListenThread.getInstance(this.getApplicationContext(), handler).isAlive() && isSpoofing()) {
+		} else if (ListenThread.running && ListenThread.getInstance(this.getApplicationContext(), handler).isAlive()
+				&& isSpoofing()) {
 			tstatus.setText(getString(R.string.label_running_and_spoofing));
 			tstatus.setTextColor(Color.GREEN);
 			tstatus.setTextSize(15);
 			pbrunning.setVisibility(ProgressBar.VISIBLE);
-		} else if (!(ListenThread.running && ListenThread.getInstance(this.getApplicationContext(), handler).isAlive()) && isSpoofing()) {
+		} else if (!(ListenThread.running && ListenThread.getInstance(this.getApplicationContext(), handler).isAlive())
+				&& isSpoofing()) {
 			tstatus.setText(getString(R.string.label_not_running_and_spoofing));
 			tstatus.setTextColor(Color.YELLOW);
 			tstatus.setTextSize(15);
@@ -475,7 +538,7 @@ public class ListenActivity extends Activity implements OnClickListener, OnItemC
 			tstatus.setTextSize(15);
 			pbrunning.setVisibility(ProgressBar.INVISIBLE);
 		}
-		
+
 		Button buttonSpoof = (Button) findViewById(R.id.bspoof);
 		if (isSpoofing()) {
 			buttonSpoof.setText("stop ARP spoofing");
@@ -491,32 +554,33 @@ public class ListenActivity extends Activity implements OnClickListener, OnItemC
 		if (!(wm.getWifiState() == WifiManager.WIFI_STATE_ENABLED)) {
 			networkConnected = false;
 			networkEncryptionWPA = false;
-			
+
 			networkName = "- None -";
 			tnetworkName.setText(getString(R.string.label_networkname_pref) + networkName.toUpperCase());
-			
+
 			tnetworkConnected.setText(getString(R.string.label_status_disconnected));
 			tnetworkConnected.setTextColor(Color.RED);
-			
+
 			tnetworkEncryption.setText("");
 		}
-		
+
 		for (WifiConfiguration wc : wm.getConfiguredNetworks()) {
-			if (!(wc.status == Status.CURRENT)) continue;
+			if (!(wc.status == Status.CURRENT))
+				continue;
 			networkConnected = true;
 			tnetworkConnected.setText(getString(R.string.label_status_connected));
 			tnetworkConnected.setTextColor(Color.GREEN);
-			
+
 			networkName = wc.SSID;
 			tnetworkName.setText(getString(R.string.label_networkname_pref) + networkName.toUpperCase());
-			
+
 			if (wc.preSharedKey != null) {
 				networkEncryptionWPA = true;
 				tnetworkEncryption.setText(getString(R.string.label_wpa_network));
 				tnetworkEncryption.setTextColor(Color.RED);
 			} else {
 				networkEncryptionWPA = false;
-				if (wc.wepKeys[0] != null) {					
+				if (wc.wepKeys[0] != null) {
 					tnetworkEncryption.setText(getString(R.string.label_wep_network));
 					tnetworkEncryption.setTextColor(Color.YELLOW);
 				} else {
@@ -531,17 +595,35 @@ public class ListenActivity extends Activity implements OnClickListener, OnItemC
 		if (lastNotification >= authList.size())
 			return;
 		lastNotification = authList.size();
-	
+
 		int icon = R.drawable.droidsheep_square;
 		long when = System.currentTimeMillis();
 		Notification notification = new Notification(icon, getString(R.string.notification_title), when);
-	
+
 		Context context = getApplicationContext();
 		Intent notificationIntent = new Intent(ListenActivity.this, ListenActivity.class);
 		PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
-	
-		notification.setLatestEventInfo(context, getString(R.string.notification_title), getString(R.string.notification_text), contentIntent);
+
+		notification.setLatestEventInfo(context, getString(R.string.notification_title), getString(R.string.notification_text),
+				contentIntent);
 		mNotificationManager.notify(NOTIFICATION_ID, notification);
+	}
+	
+	public void clearBlacklist() {
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setMessage(R.string.clear_blacklist).setCancelable(false)
+				.setPositiveButton(R.string.clear_blacklist_ok, new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int id) {
+						DBHelper.clearBlacklist(ListenActivity.this);
+						AuthHelper.clearBlacklist();
+					}
+				}).setNegativeButton(R.string.clear_blacklist_abprt, new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int id) {
+						dialog.cancel();
+					}
+				});
+		AlertDialog alert = builder.create();
+		alert.show();
 	}
 
 }
