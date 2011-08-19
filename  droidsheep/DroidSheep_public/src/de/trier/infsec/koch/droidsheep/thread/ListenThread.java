@@ -93,10 +93,10 @@ public class ListenThread extends Thread {
 				}
 				
 				Log.d(ListenActivity.APPLICATION_TAG, line);
-				String[] lst = line.split(";");
-				for (String cookieString : lst) {
-					Log.d(ListenActivity.APPLICATION_TAG, cookieString);
-				}
+//				String[] lst = line.split(";");
+//				for (String cookieString : lst) {
+//					Log.d(ListenActivity.APPLICATION_TAG, cookieString);
+//				}
 				Auth a = AuthHelper.match(line);
 				if (a != null) {
 					ListenActivity.authList.put(a.getId(), a);

@@ -143,7 +143,6 @@ public class ListenActivity extends Activity implements OnClickListener, OnItemC
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		if (!RootAccess.isGranted()) {
-			showUnrooted();
 			unrooted = true;
 		} else {
 			SetupHelper.checkPrerequisites(this.getApplicationContext());
@@ -156,8 +155,10 @@ public class ListenActivity extends Activity implements OnClickListener, OnItemC
 	@Override
 	protected void onStart() {
 		super.onStart();
-		if (unrooted)
+		if (unrooted) {
+			showUnrooted();
 			return;
+		}
 		setContentView(R.layout.listen);
 		Button button = (Button) findViewById(R.id.bstartstop);
 		Button buttonSpoof = (Button) findViewById(R.id.bspoof);

@@ -2,7 +2,7 @@
 <resources>
     <string name="app_name">DroidSheep</string>
     <string name="license">DroidSheep comes with absolutely no warranty.\n\nYou use this software on your own risk.\nThe developer is not responsible for any damages caused by DroidSheep or it´s usage.\nIt´s only the users responsibility to check his countrys laws in order to make sure that the usage of DroidSheep is permitted by law in his country. In some countries stealing someones identity might be prohibited by law.\n\nAlways think about what you´re doing! Stealing someons identity can cause real trouble for him and maybe for you\n</string>
-    <string name="unrooted">YOUR PHONE SEEMS NOT TO BE ROOTED\n\nDroidSheep can only run on phones having superuser access enabled. DroidSheep will not run on your phone and will exit now. Sorry.</string>
+    <string name="unrooted">YOUR PHONE SEEMS NOT TO BE ROOTED\n\nDroidSheep can only run on phones having superuser access enabled. DroidSheep will not run on your phone and will exit now. Sorry. (If you just rooted your phone, please restart the phone for making DroidSheep work)</string>
     <string name="accept">I understand and accept the disclaimer</string>
     <string name="button_stop">Stop</string>
 	<string name="button_start">Start</string>
