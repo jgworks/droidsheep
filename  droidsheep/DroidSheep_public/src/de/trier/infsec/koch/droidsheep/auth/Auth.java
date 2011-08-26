@@ -19,18 +19,22 @@
 
 package de.trier.infsec.koch.droidsheep.auth;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 import de.trier.infsec.koch.droidsheep.objects.CookieWrapper;
 
 
-public class Auth {
-
-	ArrayList<CookieWrapper> cookieList = null;
+public class Auth implements Serializable {
+	private static final long serialVersionUID = 7124255590593980755L;
+	
+	
+	ArrayList <CookieWrapper> cookieList = null;
 	String url = null;
 	String mobileurl = null;
 	String id = null;
 	boolean generic = true;
+	boolean saved = false;
 	
 	public Auth(ArrayList<CookieWrapper> cookieList, String url, String mobileUrl, boolean generic) {
 		this.cookieList = cookieList;
@@ -42,7 +46,8 @@ public class Auth {
 		for (CookieWrapper c : cookieList) {
 			id += c.getCookie().getValue().hashCode();
 		}
-		this.id = "DroidSheep ID: " + Integer.toString(id);
+//		this.id = "DroidSheep ID: " + Integer.toString(id);
+		this.id = Integer.toString(id);
 	}
 
 	public String getId() {
@@ -70,5 +75,12 @@ public class Auth {
 		return generic;
 	}
 	
+	public boolean isSaved() {
+		return saved;
+	}
+	
+	public void setSaved(boolean saved) {
+		this.saved = saved;
+	}
 
 }

@@ -21,8 +21,13 @@
 	<string name="toast_wifi_lost">Wifi connection lost or changed. Stopped Listening!</string>
 	<string name="toast_process_running_text">Process already running</string>
 	<string name="menu_black_list">Add host to blacklist</string>
+	<string name="menu_save">Save cookies</string>
+	<string name="cbarpspoof">Enable ARP-Spoofing \n(Needed for WPA/WPA2/WIRED Clients!)</string>
+	
+	<string name="menu_delete">Delete saved cookies</string>
 	<string name="menu_open_mobile">Open mobile site</string>
 	<string name="menu_open_normal">Open site</string>
+	
 	<string name="menu_remove_from_list">Remove from list</string>
 	<string name="menu_choose_page_title">Choose page type:</string>
 	<string name="menu_wifilist">Choose WiFi</string>
@@ -30,9 +35,16 @@
 	<string name="menu_enable_generic">Enable Generic mode</string>
 	<string name="menu_disable_generic">Disable Generic mode</string>
 	<string name="menu_exit">Exit</string>
+	<string name="menu_export">Export via eMail</string>
 	<string name="clear_blacklist">Do you really want to delete all hosts from blacklist?</string>
 	<string name="menu_blacklist_clear">Clear Blacklist</string>
+	<string name="menu_helpforum">HELP!</string>
 	<string name="clear_blacklist_ok">Yes</string>
 	<string name="clear_blacklist_abprt">Abort</string>
 	<string name="accept_text">You must accept this disclaimer in order to use DroidSheep!</string>
+	
+	<string name="donatetext">I hope you like DroidSheep!\n\nDroidSheep is free and open source. Nevertheless, it takes a lot of time to support DroidSheep and also some money for running www.droidsheep.de\n\nSo if you would like to appreciate this work, you are very welcome to donate some money to make this happen. \n\nThanks!</string>
+	<string name="donate_no">No, I´m not interested.</string>
+	<string name="donate_yes">Yes, your work is worth it!</string>
+	
 </resources>

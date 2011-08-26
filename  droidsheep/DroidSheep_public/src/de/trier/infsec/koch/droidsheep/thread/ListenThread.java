@@ -31,16 +31,13 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
-import de.trier.infsec.koch.droidsheep.activities.ListenActivity;
-import de.trier.infsec.koch.droidsheep.auth.Auth;
 import de.trier.infsec.koch.droidsheep.auth.AuthHelper;
+import de.trier.infsec.koch.droidsheep.helper.Constants;
 import de.trier.infsec.koch.droidsheep.helper.SystemHelper;
 
 public class ListenThread extends Thread {
 
 	public static volatile boolean running = false;
-	
-	public static final String CLEANUP_COMMAND = "killall droidsheep\n";
 	
 	static Process droidSheepProcess = null;
 	static ListenThread singleton = null;
@@ -67,13 +64,13 @@ public class ListenThread extends Thread {
 	public void run() {
 		Message message = handler.obtainMessage();
 		Bundle b = new Bundle();
-		b.putString(ListenActivity.BUNDLE_KEY_NOROOT, ListenActivity.BUNDLE_KEY_NOROOT);
+		b.putString(Constants.BUNDLE_KEY_NOROOT, Constants.BUNDLE_KEY_NOROOT);
 		message.setData(b);
 		handler.sendMessage(message);
 		
 		running = true;
 		startProcess();
-		AuthHelper.init(context);
+//		AuthHelper.init(context);
 		
 		if (inputStream == null) {
 			reset();
@@ -92,23 +89,14 @@ public class ListenThread extends Thread {
 					continue;
 				}
 				
-				Log.d(ListenActivity.APPLICATION_TAG, line);
+				Log.d(Constants.APPLICATION_TAG, line);
 //				String[] lst = line.split(";");
 //				for (String cookieString : lst) {
 //					Log.d(ListenActivity.APPLICATION_TAG, cookieString);
 //				}
-				Auth a = AuthHelper.match(line);
-				if (a != null) {
-					ListenActivity.authList.put(a.getId(), a);
-					Message m = handler.obtainMessage();
-					Bundle bundle = new Bundle();
-					bundle.putString(ListenActivity.BUNDLE_KEY_AUTH, a.getId());
-					bundle.putString(ListenActivity.BUNDLE_KEY_TYPE, ListenActivity.BUNDLE_TYPE_NEWAUTH);
-					m.setData(bundle);
-					handler.sendMessage(m);
-				}
+				AuthHelper.process(line);
 			} catch (Exception e) {
-				Log.e(ListenActivity.APPLICATION_TAG, "Exception: ", e);
+				Log.e(Constants.APPLICATION_TAG, "Exception: ", e);
 				cleanUp();
 				break;
 			}
@@ -133,7 +121,7 @@ public class ListenThread extends Thread {
 		running = false;
 		try {
 			Process killProcess = new ProcessBuilder().command("su").start();
-			killProcess.getOutputStream().write(CLEANUP_COMMAND.getBytes("ASCII"));
+			killProcess.getOutputStream().write(Constants.CLEANUP_COMMAND_DROIDSHEEP.getBytes("ASCII"));
 			killProcess.getOutputStream().flush();
 		} catch (Exception e) {
 			e.printStackTrace();

@@ -31,6 +31,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import de.trier.infsec.koch.droidsheep.R;
+import de.trier.infsec.koch.droidsheep.activities.ListenActivity;
 import de.trier.infsec.koch.droidsheep.auth.Auth;
 
 public class AuthListAdapter extends BaseAdapter {
@@ -40,23 +41,23 @@ public class AuthListAdapter extends BaseAdapter {
 	public static final String AMAZON	= "http://www.amazon.de";
 	public static final String TWITTER 	= "http://www.twitter.com";
     
-    private Hashtable<String, Auth> authList;
+//    private Hashtable<String, Auth> authList;
  
     private Context context;
  
     public AuthListAdapter(Hashtable<String, Auth> authList, Context context) {
-        this.authList = authList;
+//        this.authList = authList;
         this.context = context;
     }
  
     public int getCount() {
-        return authList.size();
+        return ListenActivity.authList.size();
     }
  
     @Override
     public Auth getItem(int position) {
-    	String key = authList.keySet().toArray(new String[]{})[position];
-        return authList.get(key);
+    	String key = ListenActivity.authList.keySet().toArray(new String[]{})[position];
+        return ListenActivity.authList.get(key);
     }
  
     @Override
@@ -64,13 +65,13 @@ public class AuthListAdapter extends BaseAdapter {
 
     	LinearLayout itemLayout = (LinearLayout) LayoutInflater.from(context).inflate(R.layout.listelement, parent, false);
         
-    	if (position >= authList.keySet().toArray(new String[]{}).length) return itemLayout;
+    	if (position >= ListenActivity.authList.keySet().toArray(new String[]{}).length) return itemLayout;
     	
-    	String key = authList.keySet().toArray(new String[]{})[position];
-    	if (authList == null || authList.get(key) == null) {
+    	String key = ListenActivity.authList.keySet().toArray(new String[]{})[position];
+    	if (ListenActivity.authList == null || ListenActivity.authList.get(key) == null) {
     		return itemLayout;
     	}
-    	Auth auth = authList.get(key);
+    	Auth auth = ListenActivity.authList.get(key);
  
         TextView 	tv1 	= (TextView) 	itemLayout.findViewById(R.id.listtext1);
         TextView 	tv2 	= (TextView) 	itemLayout.findViewById(R.id.listtext2);
@@ -84,7 +85,7 @@ public class AuthListAdapter extends BaseAdapter {
         	tv1.setTextColor(Color.GREEN);
         }
 
-        tv2.setText(auth.getId());
+        tv2.setText("ID: " + auth.getId() + (auth.isSaved()?" << SAVED >>":""));
         
         if (auth.getName().equals(FACEBOOK)) {
         	imgView.setImageDrawable(context.getResources().getDrawable(R.drawable.droidsheep_square));
@@ -103,7 +104,7 @@ public class AuthListAdapter extends BaseAdapter {
 
 	@Override
 	public long getItemId(int position) {
-		return authList.keySet().toArray(new String[]{})[position].hashCode();
+		return ListenActivity.authList.keySet().toArray(new String[]{})[position].hashCode();
 	}
  
 }

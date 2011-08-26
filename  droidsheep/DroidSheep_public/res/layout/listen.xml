@@ -5,12 +5,7 @@
 	android:layout_height="fill_parent"
 	android:padding="10px"
 	android:orientation="vertical">
-	<Button
-		android:layout_width="fill_parent"
-		android:id="@+id/bspoof"
-		android:layout_height="wrap_content"
-		android:enabled="true"
-		android:text="start ARP spoofing"></Button>
+	<!-- <Button android:layout_width="fill_parent" android:id="@+id/bspoof" android:layout_height="wrap_content" android:enabled="true" android:text="start ARP spoofing"></Button> -->
 	<TextView
 		android:text="TEST"
 		android:id="@+id/networkname"
@@ -48,6 +43,14 @@
 		android:layout_weight="1.0"
 		android:divider="#FFCC00"
 		android:id="@+id/sessionlist"></de.trier.infsec.koch.droidsheep.objects.SessionListView>
+	<CheckBox
+		android:id="@+id/cbarpspoof"
+		android:checked="true"
+		android:text="@string/cbarpspoof"
+		android:textSize="14sp"
+		android:textColor="#FFFFFF"
+		android:layout_height="wrap_content"
+		android:layout_width="fill_parent" />
 	<LinearLayout
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content"

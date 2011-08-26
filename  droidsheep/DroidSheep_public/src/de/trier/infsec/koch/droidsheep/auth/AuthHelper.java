@@ -29,9 +29,13 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import android.content.Context;
 import android.content.res.XmlResourceParser;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 import de.trier.infsec.koch.droidsheep.R;
 import de.trier.infsec.koch.droidsheep.activities.ListenActivity;
+import de.trier.infsec.koch.droidsheep.helper.Constants;
 import de.trier.infsec.koch.droidsheep.helper.DBHelper;
 
 public class AuthHelper {
@@ -40,8 +44,10 @@ public class AuthHelper {
 	static AuthDefinition generic = null;
 	static String binaryPath = null;
 	static HashMap<String, Object> blacklist = null;
+	static Handler handler = null;
 
-	public static void init(Context c) {
+	public static void init(Context c, Handler handler) {
+		AuthHelper.handler = handler;
 		try {
 			readConfig(c);
 		} catch (Exception e) {
@@ -106,7 +112,9 @@ public class AuthHelper {
 			AuthDefinition ad = authDefList.get(key);
 			Auth a = ad.getAuthFromCookieString(line);
 			if (a != null) {
-				Log.d("FS", "MATCH:" + a.getName());
+				if (Constants.DEBUG) {					
+					Log.d(Constants.APPLICATION_TAG, "MATCH:" + a.getName());
+				}
 				if (blacklist.containsKey(a.getName())) {
 					return null;
 				}
@@ -124,6 +132,19 @@ public class AuthHelper {
 			return a;
 		}
 		return null;
+	}
+		
+	public static void process (String line) {
+		Auth a = match(line);
+		if (a != null) {
+			ListenActivity.authList.put(a.getId(), a);
+			Message m = handler.obtainMessage();
+			Bundle bundle = new Bundle();
+			bundle.putString(Constants.BUNDLE_KEY_AUTH, a.getId());
+			bundle.putString(Constants.BUNDLE_KEY_TYPE, Constants.BUNDLE_TYPE_NEWAUTH);
+			m.setData(bundle);
+			handler.sendMessage(m);
+		}
 	}
 
 	public static void addToBlackList(Context c, String name) {

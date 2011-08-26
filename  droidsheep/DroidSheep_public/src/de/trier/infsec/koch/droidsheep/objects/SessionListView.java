@@ -27,10 +27,6 @@ import de.trier.infsec.koch.droidsheep.activities.ListenActivity;
 
 public class SessionListView extends ListView {
 
-	public static final int ID_MOBILE = 1;
-	public static final int ID_NORMAL = 2;
-	public static final int ID_DELETE = 3;
-	public static final int ID_BLACKLIST = 4;
 	public AuthListAdapter adapter = null;
 	
 	public SessionListView(Context context) {

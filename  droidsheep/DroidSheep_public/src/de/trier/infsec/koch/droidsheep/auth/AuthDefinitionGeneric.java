@@ -6,7 +6,7 @@ import org.apache.http.impl.cookie.BasicClientCookie;
 
 import android.util.Log;
 
-import de.trier.infsec.koch.droidsheep.activities.ListenActivity;
+import de.trier.infsec.koch.droidsheep.helper.Constants;
 import de.trier.infsec.koch.droidsheep.objects.CookieWrapper;
 
 public class AuthDefinitionGeneric extends AuthDefinition {
@@ -25,13 +25,13 @@ public class AuthDefinitionGeneric extends AuthDefinition {
 		String[] lst = cookieListString.split("\\|\\|\\|");
 
 		if (lst.length < 2) {
-			Log.d(ListenActivity.APPLICATION_TAG, "String not recognized: " + cookieListString);
+			Log.d(Constants.APPLICATION_TAG, "String not recognized: " + cookieListString);
 			return null;
 		}
 		String host = lst[1].replaceAll("Host=", "");
 		host = host.replaceAll(" ", "");
 		if (host == null || host.replaceAll(" ", "").equals("")) {
-			Log.d(ListenActivity.APPLICATION_TAG, "Host is empty or null: " + cookieListString);
+			Log.d(Constants.APPLICATION_TAG, "Host is empty or null: " + cookieListString);
 			return null;
 		}
 

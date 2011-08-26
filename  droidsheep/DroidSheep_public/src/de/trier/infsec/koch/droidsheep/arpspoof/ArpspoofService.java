@@ -27,6 +27,7 @@ package de.trier.infsec.koch.droidsheep.arpspoof;
 
 import java.io.IOException;
 
+import de.trier.infsec.koch.droidsheep.helper.Constants;
 import de.trier.infsec.koch.droidsheep.helper.SystemHelper;
 
 import android.app.IntentService;
@@ -57,7 +58,8 @@ public class ArpspoofService extends IntentService {
 		String gateway = bundle.getString("gateway");
 		String wifiInterface = bundle.getString("interface");
 		final String command = localBin + " -i " + wifiInterface + " " + gateway;
-
+		
+		SystemHelper.execSUCommand("chmod 777 " + SystemHelper.getARPSpoofBinaryPath(this));
 		SystemHelper.execSUCommand("echo 1 > " + IPV4_FILEPATH);
 
 		//		Notification notification = new Notification(R.drawable.ic_stat_spoofing, "now spoofing: " + gateway, System.currentTimeMillis());
@@ -74,7 +76,7 @@ public class ArpspoofService extends IntentService {
 		wifiLock.acquire();
 		wakeLock.acquire();
 		try {
-			myThread = new ExecuteCommand(command);
+			myThread = new ExecuteCommand(command, false);
 			myThread.setDaemon(true);
 			myThread.start();
 			myThread.join();
@@ -103,6 +105,7 @@ public class ArpspoofService extends IntentService {
 			myThread = null;
 			tmpThread.interrupt();
 		}
+		SystemHelper.execSUCommand(Constants.CLEANUP_COMMAND_ARPSPOOF);
 		SystemHelper.execSUCommand("echo 0 > " + IPV4_FILEPATH);
 	}
 }
