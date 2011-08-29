@@ -72,7 +72,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 import de.trier.infsec.koch.droidsheep.R;
 import de.trier.infsec.koch.droidsheep.arpspoof.ArpspoofService;
-import de.trier.infsec.koch.droidsheep.arpspoof.RootAccess;
 import de.trier.infsec.koch.droidsheep.auth.Auth;
 import de.trier.infsec.koch.droidsheep.auth.AuthHelper;
 import de.trier.infsec.koch.droidsheep.helper.Constants;
@@ -186,13 +185,16 @@ public class ListenActivity extends Activity implements OnClickListener, OnItemC
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		
 		if (Constants.DEBUG)
 			Log.d(Constants.APPLICATION_TAG, "ONCREATE");
+		
 		SetupHelper.checkPrerequisites(this.getApplicationContext());
+		
 		AuthHelper.init(this.getApplicationContext(), handler);
 		WifiChangeChecker wi = new WifiChangeChecker(handler);
 		this.getApplicationContext().registerReceiver(wi, new IntentFilter(WifiManager.WIFI_STATE_CHANGED_ACTION));
-		if (!RootAccess.isGranted()) {
+		if (!SetupHelper.checkSu()) {
 			showUnrooted();
 		}
 		if (!SetupHelper.checkCommands()) {

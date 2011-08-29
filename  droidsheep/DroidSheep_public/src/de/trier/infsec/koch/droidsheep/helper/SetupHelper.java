@@ -119,5 +119,67 @@ public class SetupHelper {
 		}
 		return hasBusybox;
 	}
+	
+	public static boolean checkSu() {
+		Process process = null;
+		DataOutputStream os = null;
+		InputStreamReader osRes = null;
+		boolean hasBusybox = false;
+
+		try {
+			process = Runtime.getRuntime().exec("ls /system/bin");
+			os = new DataOutputStream(process.getOutputStream());
+			osRes = new InputStreamReader(process.getInputStream());
+			BufferedReader reader = new BufferedReader(osRes);
+
+			os.writeBytes("exit \n");
+			os.flush();
+
+			String line = reader.readLine();
+			while (line != null) {
+				if (line.contains("su")) {
+					hasBusybox = true;
+				}
+				line = reader.readLine();
+			}
+			process.waitFor();
+			
+			process = Runtime.getRuntime().exec("ls /system/xbin");
+			os = new DataOutputStream(process.getOutputStream());
+			osRes = new InputStreamReader(process.getInputStream());
+			reader = new BufferedReader(osRes);
+
+			os.writeBytes("exit \n");
+			os.flush();
+
+			line = reader.readLine();
+			while (line != null) {
+				if (line.contains("su")) {
+					hasBusybox = true;
+				}
+				line = reader.readLine();
+			}
+			process.waitFor();
+		} catch (InterruptedException e) {
+			Log.e(Constants.APPLICATION_TAG, "error checking root access", e);
+		} catch (IOException e) {
+			Log.e(Constants.APPLICATION_TAG, "error checking root access", e);
+		} finally {
+			try {
+				if (os != null) {
+					os.close();
+				}
+				if (osRes != null) {
+					osRes.close();
+				}
+			} catch (IOException e) {
+				// swallow error
+			} finally {
+				if (process != null)
+					process.destroy();
+			}
+		}
+		return hasBusybox;
+	}
 
 }

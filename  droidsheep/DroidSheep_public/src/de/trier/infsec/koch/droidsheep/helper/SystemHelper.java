@@ -61,7 +61,7 @@ public class SystemHelper {
 					return false;
 				}
 			}
-			Thread.sleep(300);
+			Thread.sleep(100);
 			return true;
 		} catch (Exception e) {
 			Log.e(Constants.APPLICATION_TAG, "Error executing: " + command, e);

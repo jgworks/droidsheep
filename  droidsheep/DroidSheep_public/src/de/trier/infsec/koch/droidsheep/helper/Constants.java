@@ -21,7 +21,7 @@ public class Constants {
 	public static final String 	BUNDLE_KEY_AUTH 			= "AUTH";
 	public static final String 	BUNDLE_KEY_NOROOT 			= "NOROOT";
 	
-	public static final boolean DEBUG 						= true;
+	public static final boolean DEBUG 						= false;
 	
 	public static final String 	CLEANUP_COMMAND_DROIDSHEEP 	= "killall droidsheep\n";
 	public static final String 	CLEANUP_COMMAND_ARPSPOOF   	= "killall arpspoof\n";
