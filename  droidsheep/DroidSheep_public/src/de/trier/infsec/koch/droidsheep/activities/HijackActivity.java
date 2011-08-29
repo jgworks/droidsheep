@@ -175,7 +175,7 @@ public class HijackActivity extends Activity {
 	@Override
 	protected void onStart() {
 		super.onStart();
-		String key = this.getIntent().getExtras().getString("ID");
+		int key = this.getIntent().getExtras().getInt("ID");
 		this.authToHijack = ListenActivity.authList.get(key);
 
 		if (authToHijack == null) {

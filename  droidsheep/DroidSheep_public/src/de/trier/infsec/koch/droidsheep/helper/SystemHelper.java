@@ -39,7 +39,7 @@ public class SystemHelper {
 
 	static Process process = null;
 	
-	public static void execSUCommand(String command) {
+	public static boolean execSUCommand(String command) {
 		try {
 			if (process == null || process.getOutputStream() == null) {
 				process = new ProcessBuilder().command("su").start();
@@ -55,14 +55,17 @@ public class SystemHelper {
 				while (process.getErrorStream().available() > 0) {
 					sb.append((char) process.getErrorStream().read());
 				}
-				if (sb.toString().length() > 0) {
-					Log.e(Constants.APPLICATION_TAG, "Error with command: " + sb.toString());
+				String s = sb.toString();
+				if (!s.replaceAll(" ", "").equalsIgnoreCase("")) {
+					Log.e(Constants.APPLICATION_TAG, "Error with command: " + s);
+					return false;
 				}
 			}
-			Thread.sleep(100);
-			
+			Thread.sleep(300);
+			return true;
 		} catch (Exception e) {
 			Log.e(Constants.APPLICATION_TAG, "Error executing: " + command, e);
+			return false;
 		}
 	}
 	
@@ -147,7 +150,7 @@ public class SystemHelper {
 				Auth object = (Auth) in.readObject();
 				in.close();
 				object.setSaved(true);
-				ListenActivity.authList.put(object.getId(), object);
+				ListenActivity.authList.add(object);
 			} catch (Exception e) {
 				Log.e(Constants.APPLICATION_TAG, "Error while deserialization!", e);
 			}

@@ -23,7 +23,6 @@ package de.trier.infsec.koch.droidsheep.objects;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.widget.ListView;
-import de.trier.infsec.koch.droidsheep.activities.ListenActivity;
 
 public class SessionListView extends ListView {
 
@@ -31,14 +30,14 @@ public class SessionListView extends ListView {
 	
 	public SessionListView(Context context) {
 		super(context);
-		adapter = new AuthListAdapter(ListenActivity.authList, context);
+		adapter = new AuthListAdapter(context);
 		this.setAdapter(adapter);
 		this.setLongClickable(false);
 	}
 	
 	public SessionListView(Context c, AttributeSet attrset) {
 		super(c, attrset);
-		adapter = new AuthListAdapter(ListenActivity.authList, c);
+		adapter = new AuthListAdapter(c);
 		this.setAdapter(adapter);
 		this.setLongClickable(false);
 	}

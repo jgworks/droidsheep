@@ -137,10 +137,9 @@ public class AuthHelper {
 	public static void process (String line) {
 		Auth a = match(line);
 		if (a != null) {
-			ListenActivity.authList.put(a.getId(), a);
 			Message m = handler.obtainMessage();
 			Bundle bundle = new Bundle();
-			bundle.putString(Constants.BUNDLE_KEY_AUTH, a.getId());
+			bundle.putSerializable(Constants.BUNDLE_KEY_AUTH, a);
 			bundle.putString(Constants.BUNDLE_KEY_TYPE, Constants.BUNDLE_TYPE_NEWAUTH);
 			m.setData(bundle);
 			handler.sendMessage(m);

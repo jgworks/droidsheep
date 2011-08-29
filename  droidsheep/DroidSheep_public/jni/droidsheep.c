@@ -163,7 +163,8 @@ struct sniff_tcp {
 	u_short th_urp; /* urgent pointer */
 };
 
-void got_packet(u_char *args, const struct pcap_pkthdr *header, const u_char *packet);
+void got_packet(u_char *args, const struct pcap_pkthdr *header,
+		const u_char *packet);
 void print_payload(const u_char *payload, int len);
 void print_hex_ascii_line(const u_char *payload, int len, int offset);
 void print_app_banner(void);
@@ -195,6 +196,12 @@ void print_app_usage(void) {
 	return;
 }
 
+char host[256];
+char cookie[50000];
+int host_idx = 0;
+int cookie_idx = 0;
+int truncated = 0;
+
 void print_cookies(const u_char *payload, int len) {
 	const u_char *ch = payload;
 	int i;
@@ -204,42 +211,104 @@ void print_cookies(const u_char *payload, int len) {
 
 	int mode = 0;
 
-	ch = payload;
-	for (i = 0; i < len; i++) {
+	char tmp[5];
+	tmp[0] = *ch;
+	tmp[1] = *(ch + 1);
+	tmp[2] = *(ch + 2);
+	tmp[3] = *(ch + 3);
+	tmp[4] = '\0';
+
+	if (truncated > 0
+			&& !(tmp[0] == 'H' && tmp[1] == 'T' && tmp[2] == 'T' && tmp[3] == 'P')
+			&& !(tmp[0] == 'G' && tmp[1] == 'E' && tmp[2] == 'T')) {
+		mode = 7;
+	} else {
+		if (!(tmp[0] == 'G' && tmp[1] == 'E' && tmp[2] == 'T')) {
+			return;
+		}
+		host_idx = 0;
+		cookie_idx = 0;
+		host[host_idx] = '\0';
+		cookie[cookie_idx] = '\0';
+		truncated = 0;
+	}
+
+	for (i = 0; i <= len; i++) {
 		char c = *ch;
 
 		if (mode == 0 && (c == 'C' || c == 'c')) {
 			mode = 1;
-		} else if (mode == 1 && (c == 'O' || c == 'o')) {
+			truncated = 0;
+		} else if (mode == 1 && (c == 'o')) {
 			mode = 2;
-		} else if (mode == 2 && (c == 'O' || c == 'o')) {
+			truncated = 0;
+		} else if (mode == 2 && (c == 'o')) {
 			mode = 3;
-		} else if (mode == 3 && (c == 'K' || c == 'k')) {
+			truncated = 0;
+		} else if (mode == 3 && (c == 'k')) {
 			mode = 4;
-		} else if (mode == 4 && (c == 'I' || c == 'i')) {
+			truncated = 0;
+		} else if (mode == 4 && (c == 'i')) {
 			mode = 5;
-		} else if (mode == 5 && (c == 'E' || c == 'e')) {
+			truncated = 0;
+		} else if (mode == 5 && (c == 'e')) {
 			mode = 6;
-			putchar('C');
-			putchar('o');
-			putchar('o');
-			putchar('k');
-			putchar('i');
-			putchar('e');
-		} else if (mode == 6 && c == '\n') {
-			putchar('\n');
+			truncated = 0;
+		} else if (mode == 6 && (c == ':')) {
+			mode = 7;
+		} else if (mode == 7 && c == '\n') {
+			cookie[cookie_idx] = '\0';
+			host[host_idx] = '\0';
+			printf("Cookie:%s|||Host=%s\n", cookie, host);
+			fflush(stdout);
+			truncated = 0;
 			mode = 0;
-		} else if (mode == 6) {
-			putchar(c);
+		} else if (mode == 15 && c == '\n') {
+			mode = 0;
+		} else if (mode == 0 && (c == 'H' || c == 'h')) {
+			mode = 11;
+		} else if (mode == 11 && (c == 'o')) {
+			mode = 12;
+		} else if (mode == 12 && (c == 's')) {
+			mode = 13;
+		} else if (mode == 13 && (c == 't')) {
+			mode = 14;
+		} else if (mode == 14 && (c == ':')) {
+			mode = 15;
+			i++; // remove space
+		} else if (mode == 7) {
+			if (isprint(c)) {
+				cookie[cookie_idx] = c;
+				if (cookie_idx < sizeof(cookie)) {
+					cookie_idx++;
+				} else {
+					printf("!!!OVERFLOW!!!");
+					fflush(stdout);
+				}
+			}
+		} else if (mode == 15) {
+			if (isprint(c)) {
+				host[host_idx] = c;
+				if (host_idx < sizeof(host)) {
+					host_idx++;
+				} else {
+					printf("!!!OVERFLOW!!!");
+					fflush(stdout);
+				}
+			}
 		} else {
 			mode = 0;
 		}
 		ch++;
 	}
+	if (mode == 7) {
+		truncated = 1;
+	}
 	return;
 }
 
-void got_packet(u_char *args, const struct pcap_pkthdr *header, const u_char *packet) {
+void got_packet(u_char *args, const struct pcap_pkthdr *header,
+		const u_char *packet) {
 
 	static int count = 1; /* packet counter */
 
@@ -266,7 +335,8 @@ void got_packet(u_char *args, const struct pcap_pkthdr *header, const u_char *pa
 	}
 
 	/* determine protocol */
-	if (ip->ip_p != IPPROTO_TCP) return;
+	if (ip->ip_p != IPPROTO_TCP)
+		return;
 
 	/*
 	 *  OK, this packet is TCP.
@@ -342,7 +412,6 @@ int main(int argc, char **argv) {
 		exit(EXIT_FAILURE);
 	}
 
-
 	/* compile the filter expression */
 	if (pcap_compile(handle, &fp, filter_exp, 0, net) == -1) {
 		printf("Couldn't parse filter %s: %s\n", filter_exp,
@@ -352,8 +421,8 @@ int main(int argc, char **argv) {
 
 	/* apply the compiled filter */
 	if (pcap_setfilter(handle, &fp) == -1) {
-		printf("Couldn't install filter %s: %s\n", filter_exp, pcap_geterr(
-				handle));
+		printf("Couldn't install filter %s: %s\n", filter_exp,
+				pcap_geterr(handle));
 		exit(EXIT_FAILURE);
 	}
 

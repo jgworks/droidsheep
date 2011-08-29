@@ -32,7 +32,7 @@ public class Auth implements Serializable {
 	ArrayList <CookieWrapper> cookieList = null;
 	String url = null;
 	String mobileurl = null;
-	String id = null;
+	int id = 0; // Id contains a hash sum of all cookies in the object. 
 	boolean generic = true;
 	boolean saved = false;
 	
@@ -42,15 +42,26 @@ public class Auth implements Serializable {
 		this.generic = generic;
 		this.url = url;
 		
-		int id = 0;
 		for (CookieWrapper c : cookieList) {
-			id += c.getCookie().getValue().hashCode();
+			this.id += c.getCookie().getValue().hashCode();
 		}
-//		this.id = "DroidSheep ID: " + Integer.toString(id);
-		this.id = Integer.toString(id);
 	}
+	
+	// Two authentications are supposed to be identical, in case their hashes are the same.
+	@Override
+	public boolean equals(Object o) {
+		if (!(o instanceof Auth)) return false;
+		Auth a = (Auth) o;
+		return (a.getId() == this.id);
+	}
+	
+	@Override
+	public int hashCode() {
+		return id;
+	}
+	
 
-	public String getId() {
+	public int getId() {
 		return id;
 	}
 

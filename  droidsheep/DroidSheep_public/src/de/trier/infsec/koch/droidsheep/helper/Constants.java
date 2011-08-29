@@ -8,6 +8,7 @@ public class Constants {
 	public static final int 	MENU_GENERIC 				= 3;
 	public static final int 	MENU_CLEAR_BLACKLIST_ID 	= 4;
 	public static final int 	MENU_HELP_FORUM			 	= 5;
+	public static final int 	MENU_DONATE				 	= 6;
 	public static final int 	NOTIFICATION_ID 			= 4711;
 	
 	public static final String 	BUNDLE_KEY_TYPE 			= "TYPE";

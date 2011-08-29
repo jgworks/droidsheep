@@ -13,7 +13,7 @@ import android.util.Log;
 /*
  * based on RootTools' isAccessGiven function from
  * http://code.google.com/p/roottools/ written by stericson (no copyright notice
- * was found)Rewritten by Robbie Clemons on June 1, 2011
+ * was found)Rewritten by Robbie Clemons on June 1, 2011; Changed by Andreas Koch, Aug. 2011
  */
 public class RootAccess {
 
@@ -48,9 +48,7 @@ public class RootAccess {
 				}
 				line = reader.readLine();
 			}
-
 			process.waitFor();
-
 		} catch (InterruptedException e) {
 			Log.e(TAG, "error checking root access", e);
 		} catch (IOException e) {
@@ -72,4 +70,5 @@ public class RootAccess {
 		}
 		return hasRoot;
 	}
+	
 }

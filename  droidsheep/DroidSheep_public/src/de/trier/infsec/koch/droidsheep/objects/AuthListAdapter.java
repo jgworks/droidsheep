@@ -19,8 +19,6 @@
 
 package de.trier.infsec.koch.droidsheep.objects;
 
-import java.util.Hashtable;
-
 import android.content.Context;
 import android.graphics.Color;
 import android.view.LayoutInflater;
@@ -45,8 +43,7 @@ public class AuthListAdapter extends BaseAdapter {
  
     private Context context;
  
-    public AuthListAdapter(Hashtable<String, Auth> authList, Context context) {
-//        this.authList = authList;
+    public AuthListAdapter(Context context) {
         this.context = context;
     }
  
@@ -56,8 +53,7 @@ public class AuthListAdapter extends BaseAdapter {
  
     @Override
     public Auth getItem(int position) {
-    	String key = ListenActivity.authList.keySet().toArray(new String[]{})[position];
-        return ListenActivity.authList.get(key);
+        return ListenActivity.authList.get(position);
     }
  
     @Override
@@ -65,13 +61,12 @@ public class AuthListAdapter extends BaseAdapter {
 
     	LinearLayout itemLayout = (LinearLayout) LayoutInflater.from(context).inflate(R.layout.listelement, parent, false);
         
-    	if (position >= ListenActivity.authList.keySet().toArray(new String[]{}).length) return itemLayout;
+    	if (position >= ListenActivity.authList.size()) return itemLayout;
     	
-    	String key = ListenActivity.authList.keySet().toArray(new String[]{})[position];
-    	if (ListenActivity.authList == null || ListenActivity.authList.get(key) == null) {
+    	if (ListenActivity.authList == null || ListenActivity.authList.get(position) == null) {
     		return itemLayout;
     	}
-    	Auth auth = ListenActivity.authList.get(key);
+    	Auth auth = ListenActivity.authList.get(position);
  
         TextView 	tv1 	= (TextView) 	itemLayout.findViewById(R.id.listtext1);
         TextView 	tv2 	= (TextView) 	itemLayout.findViewById(R.id.listtext2);
@@ -104,7 +99,7 @@ public class AuthListAdapter extends BaseAdapter {
 
 	@Override
 	public long getItemId(int position) {
-		return ListenActivity.authList.keySet().toArray(new String[]{})[position].hashCode();
+		return position;
 	}
  
 }
