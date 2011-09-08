@@ -21,16 +21,21 @@
 
 package de.trier.infsec.koch.droidsheep.helper;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
 
 import android.content.Context;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 import de.trier.infsec.koch.droidsheep.activities.ListenActivity;
 import de.trier.infsec.koch.droidsheep.auth.Auth;
@@ -39,25 +44,46 @@ public class SystemHelper {
 
 	static Process process = null;
 	
-	public static boolean execSUCommand(String command) {
+	public static boolean execSUCommand(String command, boolean debug) {
 		try {
 			if (process == null || process.getOutputStream() == null) {
 				process = new ProcessBuilder().command("su").start();
 			}
-			
 			if (Constants.DEBUG) {
 				Log.d(Constants.APPLICATION_TAG, "Command: " + command);
 			}
+			if (debug) {
+				ListenActivity.debugBuffer.append("executing command: " + command + "\n");
+			}
 			process.getOutputStream().write((command + "\n").getBytes("ASCII"));
 			process.getOutputStream().flush();				
-			if (Constants.DEBUG) {
+			if (Constants.DEBUG || ListenActivity.debugging) {
 				StringBuffer sb = new StringBuffer();
-				while (process.getErrorStream().available() > 0) {
-					sb.append((char) process.getErrorStream().read());
+				BufferedReader bre = new BufferedReader(new InputStreamReader(process.getErrorStream()));
+				Thread.sleep(10);
+				while (bre.ready()) {
+					sb.append(bre.readLine());
 				}
 				String s = sb.toString();
 				if (!s.replaceAll(" ", "").equalsIgnoreCase("")) {
 					Log.e(Constants.APPLICATION_TAG, "Error with command: " + s);
+					if (debug) {						
+						ListenActivity.debugBuffer.append("Error with command: " + command + ": " + s + "\n");
+					}
+					return false;
+				}
+				sb = new StringBuffer();
+				BufferedReader br = new BufferedReader(new InputStreamReader(process.getInputStream()));
+				Thread.sleep(10);
+				while (br.ready()) {
+					sb.append(br.readLine());
+				}
+				s = sb.toString();
+				if (!s.replaceAll(" ", "").equalsIgnoreCase("")) {
+					Log.e(Constants.APPLICATION_TAG, "Output from command: " + s);
+					if (debug) {						
+						ListenActivity.debugBuffer.append("Output from command: " + command + ": " + s + "\n");
+					}
 					return false;
 				}
 			}
@@ -69,26 +95,43 @@ public class SystemHelper {
 		}
 	}
 	
-	public static void execNewSUCommand(String command) {
+	public static void execNewSUCommand(String command, boolean debug) {
 		try {
 			if (Constants.DEBUG) {
 				Log.d(Constants.APPLICATION_TAG, "Command: " + command);
 			}
-
 			Process process = new ProcessBuilder().command("su").start();
 			process.getOutputStream().write((command + "\n").getBytes("ASCII"));
 			process.getOutputStream().flush();				
-			if (Constants.DEBUG) {
+			if (Constants.DEBUG || ListenActivity.debugging) {
 				StringBuffer sb = new StringBuffer();
-				while (process.getErrorStream().available() > 0) {
-					sb.append((char) process.getErrorStream().read());
+				BufferedReader bre = new BufferedReader(new InputStreamReader(process.getErrorStream()));
+				Thread.sleep(10);
+				while (bre.ready()) {
+					sb.append(bre.readLine());
 				}
-				if (sb.toString().length() > 0) {
+				String s = sb.toString();
+				if (!s.replaceAll(" ", "").equalsIgnoreCase("")) {
 					Log.e(Constants.APPLICATION_TAG, "Error with command: " + sb.toString());
+					if (debug) {						
+						ListenActivity.debugBuffer.append("Error with command: " + command + ": " + s + "\n");
+					}
+				}
+				sb = new StringBuffer();
+				BufferedReader br = new BufferedReader(new InputStreamReader(process.getInputStream()));
+				Thread.sleep(10);
+				while (br.ready()) {
+					sb.append(br.readLine());
+				}
+				s = sb.toString();
+				if (!s.replaceAll(" ", "").equalsIgnoreCase("")) {
+					Log.e(Constants.APPLICATION_TAG, "Output from command: " + s);
+					if (debug) {						
+						ListenActivity.debugBuffer.append("Output from command: " + command + ": " + s + "\n");
+					}
 				}
 			}
 			Thread.sleep(100);
-			
 		} catch (Exception e) {
 			Log.e(Constants.APPLICATION_TAG, "Error executing: " + command, e);
 		}
@@ -136,7 +179,7 @@ public class SystemHelper {
 	}
 
 
-	public static void readAuthFiles(Context c) {
+	public static void readAuthFiles(Context c, Handler handler) {
 		File f = new File(c.getFilesDir() + File.separator + "saved");
 		if (!f.exists() || !f.isDirectory()) {
 			Log.e(Constants.APPLICATION_TAG, c.getFilesDir() + File.separator + "saved" + " does not exist or is no folder!");
@@ -150,10 +193,22 @@ public class SystemHelper {
 				Auth object = (Auth) in.readObject();
 				in.close();
 				object.setSaved(true);
-				ListenActivity.authList.add(object);
+				Message m = handler.obtainMessage();
+				Bundle bundle = new Bundle();
+				bundle.putSerializable(Constants.BUNDLE_KEY_AUTH, object);
+				bundle.putString(Constants.BUNDLE_KEY_TYPE, Constants.BUNDLE_TYPE_NEWAUTH);
+				m.setData(bundle);
+				handler.sendMessage(m);
 			} catch (Exception e) {
 				Log.e(Constants.APPLICATION_TAG, "Error while deserialization!", e);
 			}
 		}
+	}
+
+	public static void debugInformation(Context c) {
+		ListenActivity.debugBuffer.append("Droidsheep path: " + getDroidSheepBinaryPath(c) + "\n");
+		ListenActivity.debugBuffer.append("ARPSPoof Path: " + getARPSpoofBinaryPath(c) + "\n");
+		ListenActivity.debugBuffer.append("Testing SU\n");
+		execNewSUCommand("", true);
 	}
 }

@@ -32,6 +32,7 @@ import java.io.InputStreamReader;
 import android.content.Context;
 import android.util.Log;
 import de.trier.infsec.koch.droidsheep.R;
+import de.trier.infsec.koch.droidsheep.activities.ListenActivity;
 
 public class SetupHelper {
 
@@ -52,7 +53,7 @@ public class SetupHelper {
 			}
 			out.flush();
 			out.close();
-			SystemHelper.execSUCommand("chmod 777 " + c.getFilesDir().toString() + File.separator + "droidsheep");
+			SystemHelper.execSUCommand("chmod 777 " + c.getFilesDir().toString() + File.separator + "droidsheep", ListenActivity.debugging);
 
 			File fARPSpoof = new File(SystemHelper.getARPSpoofBinaryPath(c));
 			if (fARPSpoof.exists()) {
@@ -65,7 +66,7 @@ public class SetupHelper {
 			}
 			out.flush();
 			out.close();
-			SystemHelper.execSUCommand("chmod 777 " + c.getFilesDir().toString() + File.separator + "arpspoof");
+			SystemHelper.execSUCommand("chmod 777 " + c.getFilesDir().toString() + File.separator + "arpspoof", ListenActivity.debugging);
 
 		} catch (Exception e) {
 			Log.e("FS", "", e);
@@ -80,15 +81,9 @@ public class SetupHelper {
 
 		try {
 			process = Runtime.getRuntime().exec("busybox");
-			os = new DataOutputStream(process.getOutputStream());
+			Thread.sleep(50);
 			osRes = new InputStreamReader(process.getInputStream());
 			BufferedReader reader = new BufferedReader(osRes);
-
-			os.writeBytes("id" + "\n");
-			os.flush();
-
-			os.writeBytes("exit \n");
-			os.flush();
 
 			String line = reader.readLine();
 			while (line != null) {
@@ -180,6 +175,56 @@ public class SetupHelper {
 			}
 		}
 		return hasBusybox;
+	}
+
+	public static void debugInformation(Context c) {
+		Process process;
+		try {
+			process = Runtime.getRuntime().exec("busybox");
+			Thread.sleep(50);
+			InputStreamReader osRes = new InputStreamReader(process.getInputStream());
+			BufferedReader reader = new BufferedReader(osRes);
+	
+			String line = null;
+			ListenActivity.debugBuffer.append("\n");
+			while ((line = reader.readLine())!=null) {
+				ListenActivity.debugBuffer.append(line + "\n");
+			}
+			process.waitFor();
+		} catch (Exception e) {
+			ListenActivity.debugBuffer.append("Error in SetupHelper 1: \n");
+			ListenActivity.debugBuffer.append(e);
+			ListenActivity.debugBuffer.append("\n");
+		}
+		
+		try {
+			process = Runtime.getRuntime().exec("ls -l " + SystemHelper.getDroidSheepBinaryPath(c));
+			Thread.sleep(50);
+			InputStreamReader osRes = new InputStreamReader(process.getInputStream());
+			BufferedReader reader = new BufferedReader(osRes);
+	
+			String line = null;
+			ListenActivity.debugBuffer.append("\n");
+			while ((line = reader.readLine())!=null) {
+				ListenActivity.debugBuffer.append(line + "\n");
+			}
+			process.waitFor();
+			process = Runtime.getRuntime().exec("ls -l " + SystemHelper.getARPSpoofBinaryPath(c));
+			Thread.sleep(50);
+			InputStreamReader osRes1 = new InputStreamReader(process.getInputStream());
+			BufferedReader reader1 = new BufferedReader(osRes1);
+	
+			String line1 = null;
+			ListenActivity.debugBuffer.append("\n");
+			while ((line1 = reader1.readLine())!=null) {
+				ListenActivity.debugBuffer.append(line1 + "\n");
+			}
+			process.waitFor();
+		} catch (Exception e) {
+			ListenActivity.debugBuffer.append("Error in SetupHelper 2: \n");
+			ListenActivity.debugBuffer.append(e);
+			ListenActivity.debugBuffer.append("\n");
+		}
 	}
 
 }

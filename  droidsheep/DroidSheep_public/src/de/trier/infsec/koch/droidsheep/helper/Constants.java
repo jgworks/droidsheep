@@ -1,10 +1,10 @@
 package de.trier.infsec.koch.droidsheep.helper;
 
-public class Constants {
+public interface Constants {
 
 	public static final int 	MENU_WIFILIST_ID 			= 0;
 	public static final int 	MENU_CLEAR_SESSIONLIST_ID 	= 1;
-	public static final int 	MENU_EXIT_ID 				= 2;
+	public static final int 	MENU_DEBUG_ID 				= 2;
 	public static final int 	MENU_GENERIC 				= 3;
 	public static final int 	MENU_CLEAR_BLACKLIST_ID 	= 4;
 	public static final int 	MENU_HELP_FORUM			 	= 5;
