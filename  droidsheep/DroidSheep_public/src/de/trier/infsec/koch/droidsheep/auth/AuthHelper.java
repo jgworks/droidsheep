@@ -16,8 +16,6 @@
 	    You should have received a copy of the GNU General Public License along
 	    with this program; if not, write to the Free Software Foundation, Inc.,
 	    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
-
-
 package de.trier.infsec.koch.droidsheep.auth;
 
 import java.io.IOException;
@@ -39,7 +37,6 @@ import de.trier.infsec.koch.droidsheep.helper.Constants;
 import de.trier.infsec.koch.droidsheep.helper.DBHelper;
 
 public class AuthHelper {
-
 	static HashMap<String, AuthDefinition> authDefList = new HashMap<String, AuthDefinition>();
 	static AuthDefinition generic = null;
 	static String binaryPath = null;
@@ -62,10 +59,10 @@ public class AuthHelper {
 		xpp.next();
 		int eventType = xpp.getEventType();
 
-		String mobileurl = null;
-		String name = null;
-		String url = null;
-		String domain = null;
+		String mobileurl 	= null;
+		String name 		= null;
+		String url 			= null;
+		String domain 		= null;
 		ArrayList<String> cookieNames = new ArrayList<String>();
 		
 		while (eventType != XmlPullParser.END_DOCUMENT) {

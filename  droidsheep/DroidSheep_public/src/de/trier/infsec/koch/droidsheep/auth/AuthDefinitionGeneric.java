@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import org.apache.http.impl.cookie.BasicClientCookie;
 
 import android.util.Log;
-
 import de.trier.infsec.koch.droidsheep.helper.Constants;
 import de.trier.infsec.koch.droidsheep.objects.CookieWrapper;
 
@@ -21,7 +20,6 @@ public class AuthDefinitionGeneric extends AuthDefinition {
 	}
 
 	public Auth getAuthFromCookieStringGeneric(String cookieListString) {
-		//OLog.e(ListenActivity.APPLICATION_TAG, cookieListString);
 		String[] lst = cookieListString.split("\\|\\|\\|");
 
 		if (lst.length < 2) {
@@ -37,7 +35,6 @@ public class AuthDefinitionGeneric extends AuthDefinition {
 
 		cookieListString = lst[0];
 		String theurl = "";
-		// Log.e(ListenActivity.APPLICATION_TAG, cookieListString);
 
 		if (!host.startsWith("http://")) {
 			theurl = "http://" + host;
