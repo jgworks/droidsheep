@@ -35,7 +35,6 @@ public class DonateActivity extends Activity implements OnClickListener {
 	Button bYes = null;
 	Button bNo  = null;
 	
-	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -51,7 +50,6 @@ public class DonateActivity extends Activity implements OnClickListener {
 		bYes.setOnClickListener(this);
 		bNo.setOnClickListener(this);
 	}
-
 
 	@Override
 	public void onClick(View v) {

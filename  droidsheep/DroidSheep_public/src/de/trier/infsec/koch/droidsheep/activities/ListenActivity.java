@@ -28,6 +28,7 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import android.app.Activity;
@@ -53,13 +54,11 @@ import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.KeyEvent;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnCreateContextMenuListener;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
@@ -71,21 +70,21 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import de.trier.infsec.koch.droidsheep.R;
-import de.trier.infsec.koch.droidsheep.arpspoof.ArpspoofService;
 import de.trier.infsec.koch.droidsheep.auth.Auth;
 import de.trier.infsec.koch.droidsheep.auth.AuthHelper;
 import de.trier.infsec.koch.droidsheep.helper.Constants;
 import de.trier.infsec.koch.droidsheep.helper.DBHelper;
+import de.trier.infsec.koch.droidsheep.helper.DialogHelper;
 import de.trier.infsec.koch.droidsheep.helper.MailHelper;
 import de.trier.infsec.koch.droidsheep.helper.SetupHelper;
 import de.trier.infsec.koch.droidsheep.helper.SystemHelper;
 import de.trier.infsec.koch.droidsheep.objects.SessionListView;
 import de.trier.infsec.koch.droidsheep.objects.WifiChangeChecker;
-import de.trier.infsec.koch.droidsheep.thread.ListenService;
-import de.trier.infsec.koch.droidsheep.thread.ListenThread;
+import de.trier.infsec.koch.droidsheep.services.ArpspoofService;
+import de.trier.infsec.koch.droidsheep.services.DroidSheepService;
 
 public class ListenActivity extends Activity implements OnClickListener, OnItemClickListener, OnItemLongClickListener,
-		OnCreateContextMenuListener, OnCheckedChangeListener {
+		OnCreateContextMenuListener, OnCheckedChangeListener, Constants {
 
 	private static ArrayList<Auth> authListUnsynchronized = new ArrayList<Auth>();
 	public static List<Auth> authList = Collections.synchronizedList(authListUnsynchronized);
@@ -102,18 +101,24 @@ public class ListenActivity extends Activity implements OnClickListener, OnItemC
 
 	private boolean networkEncryptionWPA = false;
 	private String networkName = "";
+	private String gatewayIP = "";
+	private String localhostIP = "";
 
 	//	public static boolean unrooted = false;
 
 	private int lastNotification = 0;
 	private NotificationManager mNotificationManager = null;
+	
+	public static StringBuffer debugBuffer = null;
+	public static boolean debugging = false;
+	
 
 	public static boolean generic = true;
 	private Handler handler = new Handler() {
 		@Override
 		public synchronized void handleMessage(Message msg) {
-			String type = msg.getData().getString(Constants.BUNDLE_KEY_TYPE);
-			if (type != null && type.equals(Constants.BUNDLE_TYPE_WIFICHANGE)) {
+			String type = msg.getData().getString(BUNDLE_KEY_TYPE);
+			if (type != null && type.equals(BUNDLE_TYPE_WIFICHANGE)) {
 				if (!isListening())
 					return;
 				Toast t = Toast.makeText(getApplicationContext(), getString(R.string.toast_wifi_lost), Toast.LENGTH_SHORT);
@@ -122,10 +127,10 @@ public class ListenActivity extends Activity implements OnClickListener, OnItemC
 				stopSpoofing();
 				cleanup();
 				updateNetworkSettings();
-			} else if (type != null && type.equals(Constants.BUNDLE_TYPE_NEWAUTH)) {
-				Serializable serializable = msg.getData().getSerializable(Constants.BUNDLE_KEY_AUTH);
+			} else if (type != null && type.equals(BUNDLE_TYPE_NEWAUTH)) {
+				Serializable serializable = msg.getData().getSerializable(BUNDLE_KEY_AUTH);
 				if (serializable == null || !(serializable instanceof Auth)) {
-					Log.e(Constants.APPLICATION_TAG, "ERROR with serializable. Null or not an instance!");
+					Log.e(APPLICATION_TAG, "ERROR with serializable. Null or not an instance!");
 					return;
 				}
 				Auth a = (Auth) serializable;
@@ -134,7 +139,7 @@ public class ListenActivity extends Activity implements OnClickListener, OnItemC
 				}
 				ListenActivity.this.refresh();
 				ListenActivity.this.notifyUser(false);
-			} else if (type != null && type.equals(Constants.BUNDLE_TYPE_START)) {
+			} else if (type != null && type.equals(BUNDLE_TYPE_START)) {
 				Button button = (Button) findViewById(R.id.bstartstop);
 				button.setEnabled(false);
 				if (!isListening() && isSpoofing()) {
@@ -154,11 +159,16 @@ public class ListenActivity extends Activity implements OnClickListener, OnItemC
 				}
 				button.setEnabled(true);
 				handler.removeMessages(0);
-			} else if (type != null && type.equals(Constants.BUNDLE_TYPE_STOP)) {
+			} else if (type != null && type.equals(BUNDLE_TYPE_STOP)) {
 				stopListening();
 				stopSpoofing();
 				refreshHandler.stop();
 				refresh();
+				if (debugging) {
+					MailHelper.sendStringByMail(ListenActivity.this, debugBuffer.toString());
+					debugging = false;
+					debugBuffer = null;
+				}
 			}
 		};
 	};
@@ -182,12 +192,17 @@ public class ListenActivity extends Activity implements OnClickListener, OnItemC
 		}
 	}
 
+	
+	// ############################################################################
+	//                           START LIFECYCLE METHODS
+	// ############################################################################
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		
-		if (Constants.DEBUG)
-			Log.d(Constants.APPLICATION_TAG, "ONCREATE");
+		if (DEBUG)
+			Log.d(APPLICATION_TAG, "ONCREATE");
 		
 		SetupHelper.checkPrerequisites(this.getApplicationContext());
 		
@@ -195,23 +210,23 @@ public class ListenActivity extends Activity implements OnClickListener, OnItemC
 		WifiChangeChecker wi = new WifiChangeChecker(handler);
 		this.getApplicationContext().registerReceiver(wi, new IntentFilter(WifiManager.WIFI_STATE_CHANGED_ACTION));
 		if (!SetupHelper.checkSu()) {
-			showUnrooted();
+			DialogHelper.showUnrooted(this);
 		}
 		if (!SetupHelper.checkCommands()) {
-			installBusyBox();
+			DialogHelper.installBusyBox(this);
 		}
 	}
 
 	@Override
 	protected void onStart() {
 		super.onStart();
-		if (Constants.DEBUG)
-			Log.d(Constants.APPLICATION_TAG, "ONSTART");
+		if (DEBUG)
+			Log.d(APPLICATION_TAG, "ONSTART");
 		setContentView(R.layout.listen);
 		Button button = (Button) findViewById(R.id.bstartstop);
 
 		button.setOnClickListener(this);
-		if (ListenThread.running) {
+		if (isListening()) {
 			button.setText(getString(R.string.button_stop));
 		} else {
 			button.setText(getString(R.string.button_start));
@@ -229,70 +244,44 @@ public class ListenActivity extends Activity implements OnClickListener, OnItemC
 		mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 		ListenActivity.generic = DBHelper.getGeneric(this);
 		cbgeneric.setChecked(ListenActivity.generic);
-		showDisclaimer();
-	}
-
-	private void showDisclaimer() {
-		if (disclaimerAccepted)
-			return;
-
-		LayoutInflater inflater = (LayoutInflater) getApplicationContext().getSystemService(LAYOUT_INFLATER_SERVICE);
-		final View layout = inflater.inflate(R.layout.disclaimer, (ViewGroup) findViewById(R.id.layout_root));
-
-		AlertDialog al = new AlertDialog(this) {
-			@Override
-			public boolean onSearchRequested() {
-				return false;
-			}
-		};
-		al.setView(layout);
-		al.setButton("OK", new DialogInterface.OnClickListener() {
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				CheckBox cb = (CheckBox) layout.findViewById(R.id.lic_ack);
-				if (!cb.isChecked()) {
-					Toast t = Toast.makeText(ListenActivity.this, getString(R.string.accept_text), Toast.LENGTH_SHORT);
-					t.show();
-					showDisclaimer();
-				} else {
-					disclaimerAccepted = true;
-				}
-			}
-		});
-		al.setCancelable(false);
-		al.show();
-	}
-
-	public void showUnrooted() {
-		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setMessage(R.string.unrooted).setCancelable(false).setPositiveButton("OK", new DialogInterface.OnClickListener() {
-			public void onClick(DialogInterface dialog, int id) {
-				dialog.cancel();
-			}
-		});
-		AlertDialog alert = builder.create();
-		alert.show();
+		DialogHelper.showDisclaimer(this);
 	}
 
 	@Override
 	protected void onResume() {
 		super.onResume();
-		//		if (unrooted)
-		//			return;
-		SystemHelper.readAuthFiles(this);
+		SystemHelper.readAuthFiles(this, handler);
 		refresh();
-		//		mNotificationManager.cancelAll();
 	}
 
 	@Override
 	protected void onDestroy() {
+		authList.clear();
+		mNotificationManager.cancelAll();
+		stopListening();
+		stopSpoofing();
+		finish();
 		try {
 			cleanup();
 		} catch (Exception e) {
-			Log.e(Constants.APPLICATION_TAG, "Error while onDestroy", e);
+			Log.e(APPLICATION_TAG, "Error while onDestroy", e);
 		}
 		super.onDestroy();
 	}
+	
+	
+	// ############################################################################
+	//                           END LIFECYCLE METHODS
+	// ############################################################################
+
+	
+	
+	
+	
+	// ############################################################################
+	//                           START LISTENER METHODS
+	// ############################################################################
+
 
 	@Override
 	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -306,7 +295,12 @@ public class ListenActivity extends Activity implements OnClickListener, OnItemC
 
 		if (view != null) {
 			sessionListViewSelected = position;
-			sessionListView.showContextMenuForChild(view);
+			try {
+				sessionListView.showContextMenuForChild(view);
+			} catch (Exception e) {
+				// VERY BAD, but actually can´t find out how the NPE happens... :-(
+				Log.d(APPLICATION_TAG, "error on click: " + e.getLocalizedMessage());
+			}
 		}
 	}
 
@@ -319,31 +313,27 @@ public class ListenActivity extends Activity implements OnClickListener, OnItemC
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
-		case Constants.MENU_WIFILIST_ID:
+		case MENU_WIFILIST_ID:
 			startActivity(new Intent(WifiManager.ACTION_PICK_WIFI_NETWORK));
 			break;
-		case Constants.MENU_CLEAR_SESSIONLIST_ID:
+		case MENU_CLEAR_SESSIONLIST_ID:
 			authList.clear();
 			refresh();
 			mNotificationManager.cancelAll();
 			break;
-		case Constants.MENU_EXIT_ID:
-			authList.clear();
-			mNotificationManager.cancelAll();
-			stopListening();
-			stopSpoofing();
-			finish();
+		case MENU_DEBUG_ID:
+			askDebug();
 			break;
-		case Constants.MENU_CLEAR_BLACKLIST_ID:
-			clearBlacklist();
+		case MENU_CLEAR_BLACKLIST_ID:
+			DialogHelper.clearBlacklist(this);
 			break;
-		case Constants.MENU_HELP_FORUM:
+		case MENU_HELP_FORUM:
 			String url = "http://droidsheep.de/forum";
 			Intent i = new Intent(Intent.ACTION_VIEW);
 			i.setData(Uri.parse(url));
 			startActivity(i);
 			break;
-		case Constants.MENU_DONATE:
+		case MENU_DONATE:
 			String url1 = "http://droidsheep.de/?page_id=121";
 			Intent i1 = new Intent(Intent.ACTION_VIEW);
 			i1.setData(Uri.parse(url1));
@@ -357,33 +347,33 @@ public class ListenActivity extends Activity implements OnClickListener, OnItemC
 	public boolean onContextItemSelected(MenuItem item) {
 		Auth a = null;
 		switch (item.getItemId()) {
-		case Constants.ID_MOBILE:
+		case ID_MOBILE:
 			click(sessionListViewSelected, true);
 			break;
-		case Constants.ID_NORMAL:
+		case ID_NORMAL:
 			click(sessionListViewSelected, false);
 			break;
-		case Constants.ID_REMOVEFROMLIST:
+		case ID_REMOVEFROMLIST:
 			authList.remove(sessionListViewSelected);
 			refresh();
 			break;
-		case Constants.ID_BLACKLIST:
+		case ID_BLACKLIST:
 			a = authList.get(sessionListViewSelected);
 			AuthHelper.addToBlackList(this, a.getName());
-			authList.remove(a.getId());
+			authList.remove(a);
 			refresh();
 			break;
-		case Constants.ID_SAVE:
+		case ID_SAVE:
 			a = authList.get(sessionListViewSelected);
 			SystemHelper.saveAuthToFile(this, a);
 			refresh();
 			break;
-		case Constants.ID_DELETE:
+		case ID_DELETE:
 			a = authList.get(sessionListViewSelected);
 			SystemHelper.deleteAuthFile(this, a);
 			refresh();
 			break;
-		case Constants.ID_EXPORT:
+		case ID_EXPORT:
 			a = authList.get(sessionListViewSelected);
 			MailHelper.sendAuthByMail(this, a);
 			break;
@@ -397,26 +387,101 @@ public class ListenActivity extends Activity implements OnClickListener, OnItemC
 			Message m = handler.obtainMessage();
 			Bundle b = new Bundle();
 			if (!isListening()) {
-				b.putString(Constants.BUNDLE_KEY_TYPE, Constants.BUNDLE_TYPE_START);
+				b.putString(BUNDLE_KEY_TYPE, BUNDLE_TYPE_START);
 			} else {
-				b.putString(Constants.BUNDLE_KEY_TYPE, Constants.BUNDLE_TYPE_STOP);
+				b.putString(BUNDLE_KEY_TYPE, BUNDLE_TYPE_STOP);
 			}
 			m.setData(b);
 			handler.sendMessage(m);
 		}
 	}
+	
+	@Override
+	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
+		Auth actElem = null;
+		if (sessionListViewSelected >= authList.size()) 
+			return;
+		actElem = authList.get(sessionListViewSelected);
+		menu.setHeaderTitle(getString(R.string.menu_choose_page_title));
+		menu.add(ContextMenu.NONE, ID_NORMAL, ContextMenu.NONE, getString(R.string.menu_open_normal));
+		menu.add(ContextMenu.NONE, ID_REMOVEFROMLIST, ContextMenu.NONE, getString(R.string.menu_remove_from_list));
+		menu.add(ContextMenu.NONE, ID_BLACKLIST, ContextMenu.NONE, getString(R.string.menu_black_list));
+		menu.add(ContextMenu.NONE, ID_EXPORT, ContextMenu.NONE, getString(R.string.menu_export));
 
+		if (actElem.isSaved()) {
+			menu.add(ContextMenu.NONE, ID_DELETE, ContextMenu.NONE, getString(R.string.menu_delete));
+		} else {
+			menu.add(ContextMenu.NONE, ID_SAVE, ContextMenu.NONE, getString(R.string.menu_save));
+		}
+
+		if (actElem.getMobileUrl() != null) {
+			menu.add(ContextMenu.NONE, ID_MOBILE, ContextMenu.NONE, getString(R.string.menu_open_mobile));
+		}
+	}
+
+	@Override
+	public boolean onPrepareOptionsMenu(Menu menu) {
+		super.onCreateOptionsMenu(menu);
+		menu.clear();
+		menu.add(0, MENU_WIFILIST_ID, 0, getString(R.string.menu_wifilist));
+		menu.add(0, MENU_CLEAR_SESSIONLIST_ID, 0, getString(R.string.menu_clear_sessionlist));
+		menu.add(0, MENU_CLEAR_BLACKLIST_ID, 0, getString(R.string.menu_blacklist_clear));
+		menu.add(0, MENU_HELP_FORUM, 0, getString(R.string.menu_helpforum));
+		menu.add(0, MENU_DONATE, 0, getString(R.string.menu_donate));
+		menu.add(0, MENU_DEBUG_ID, 0, getString(R.string.menu_debug));
+		return true;
+	}
+
+	@Override
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
+		if (keyCode == KeyEvent.KEYCODE_BACK) {
+			AlertDialog.Builder builder = new AlertDialog.Builder(this);
+			builder.setMessage(R.string.popup_exit).setCancelable(false)
+					.setPositiveButton(R.string.button_ok, new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog, int id) {
+							ListenActivity.this.finish();
+						}
+					}).setNegativeButton(R.string.button_abprt, new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog, int id) {
+							dialog.cancel();
+						}
+					});
+			AlertDialog alert = builder.create();
+			alert.show();
+		}
+		return super.onKeyDown(keyCode, event);
+	}
+	
+	@Override
+	public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+		if (buttonView.equals(cbgeneric)) {
+			ListenActivity.generic = isChecked;
+			DBHelper.setGeneric(this, isChecked);
+		}
+	}
+	
+	// ############################################################################
+	//                           END LISTENER METHODS
+	// ############################################################################
+
+	
+	
+	
+	
+	
+	
 	private void startSpoofing() {
-		if (Constants.DEBUG)
-			Log.d(Constants.APPLICATION_TAG, "START SPOOFING");
+		if (DEBUG)
+			Log.d(APPLICATION_TAG, "START SPOOFING");
 		WifiManager wManager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
 		WifiInfo wInfo = wManager.getConnectionInfo();
 
 		//Check to see if we're connected to wifi
 		int localhost = wInfo.getIpAddress();
 		if (localhost != 0) {
-			String gatewayIP = Formatter.formatIpAddress(wManager.getDhcpInfo().gateway);
-			String localhostIP = Formatter.formatIpAddress(localhost);
+			wManager.getConnectionInfo();
+			gatewayIP = Formatter.formatIpAddress(wManager.getDhcpInfo().gateway);
+			localhostIP = Formatter.formatIpAddress(localhost);
 			//If nothing was entered for the ip address use the gateway
 			if (gatewayIP.trim().equals(""))
 				gatewayIP = Formatter.formatIpAddress(wManager.getDhcpInfo().gateway);
@@ -429,9 +494,9 @@ public class ListenActivity extends Activity implements OnClickListener, OnItemC
 				NetworkInterface wifiInterface = NetworkInterface.getByInetAddress(localInet);
 				interfaceName = wifiInterface.getDisplayName();
 			} catch (UnknownHostException e) {
-				Log.e(Constants.APPLICATION_TAG, "error getting localhost's InetAddress", e);
+				Log.e(APPLICATION_TAG, "error getting localhost's InetAddress", e);
 			} catch (SocketException e) {
-				Log.e(Constants.APPLICATION_TAG, "error getting wifi network interface", e);
+				Log.e(APPLICATION_TAG, "error getting wifi network interface", e);
 			}
 
 			Intent intent = new Intent(this, ArpspoofService.class);
@@ -453,8 +518,8 @@ public class ListenActivity extends Activity implements OnClickListener, OnItemC
 	}
 
 	public void stopSpoofing() {
-		if (Constants.DEBUG)
-			Log.d(Constants.APPLICATION_TAG, "STOP SPOOFING");
+		if (DEBUG)
+			Log.d(APPLICATION_TAG, "STOP SPOOFING");
 		Intent intent = new Intent(this, ArpspoofService.class);
 		stopService(intent);
 		try {
@@ -464,9 +529,9 @@ public class ListenActivity extends Activity implements OnClickListener, OnItemC
 	}
 
 	public void stopListening() {
-		if (Constants.DEBUG)
-			Log.d(Constants.APPLICATION_TAG, "STOP LISTENING");
-		Intent intent = new Intent(this, ListenService.class);
+		if (DEBUG)
+			Log.d(APPLICATION_TAG, "STOP LISTENING");
+		Intent intent = new Intent(this, DroidSheepService.class);
 		stopService(intent);
 		try {
 			Thread.sleep(200);
@@ -477,7 +542,7 @@ public class ListenActivity extends Activity implements OnClickListener, OnItemC
 	private boolean isSpoofing() {
 		ActivityManager manager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
 		for (RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
-			if ("de.trier.infsec.koch.droidsheep.arpspoof.ArpspoofService".equals(service.service.getClassName())) {
+			if (ArpspoofService.class.getName().equals(service.service.getClassName())) {
 				return true;
 			}
 		}
@@ -487,64 +552,30 @@ public class ListenActivity extends Activity implements OnClickListener, OnItemC
 	private boolean isListening() {
 		ActivityManager manager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
 		for (RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
-			if ("de.trier.infsec.koch.droidsheep.thread.ListenService".equals(service.service.getClassName())) {
+			if (DroidSheepService.class.getName().equals(service.service.getClassName())) {
 				return true;
 			}
 		}
 		return false;
 	}
 
-	@Override
-	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
-		Auth actElem = null;
-		actElem = authList.get(sessionListViewSelected);
-		menu.setHeaderTitle(getString(R.string.menu_choose_page_title));
-		menu.add(ContextMenu.NONE, Constants.ID_NORMAL, ContextMenu.NONE, getString(R.string.menu_open_normal));
-		menu.add(ContextMenu.NONE, Constants.ID_REMOVEFROMLIST, ContextMenu.NONE, getString(R.string.menu_remove_from_list));
-		menu.add(ContextMenu.NONE, Constants.ID_BLACKLIST, ContextMenu.NONE, getString(R.string.menu_black_list));
-		menu.add(ContextMenu.NONE, Constants.ID_EXPORT, ContextMenu.NONE, getString(R.string.menu_export));
-
-		if (actElem.isSaved()) {
-			menu.add(ContextMenu.NONE, Constants.ID_DELETE, ContextMenu.NONE, getString(R.string.menu_delete));
-		} else {
-			menu.add(ContextMenu.NONE, Constants.ID_SAVE, ContextMenu.NONE, getString(R.string.menu_save));
-		}
-
-		if (actElem.getMobileUrl() != null) {
-			menu.add(ContextMenu.NONE, Constants.ID_MOBILE, ContextMenu.NONE, getString(R.string.menu_open_mobile));
-		}
-	}
-
-	@Override
-	public boolean onPrepareOptionsMenu(Menu menu) {
-		super.onCreateOptionsMenu(menu);
-		menu.clear();
-		menu.add(0, Constants.MENU_WIFILIST_ID, 0, getString(R.string.menu_wifilist));
-		menu.add(0, Constants.MENU_CLEAR_SESSIONLIST_ID, 0, getString(R.string.menu_clear_sessionlist));
-		menu.add(0, Constants.MENU_CLEAR_BLACKLIST_ID, 0, getString(R.string.menu_blacklist_clear));
-		menu.add(0, Constants.MENU_HELP_FORUM, 0, getString(R.string.menu_helpforum));
-		menu.add(0, Constants.MENU_DONATE, 0, getString(R.string.menu_donate));
-		menu.add(0, Constants.MENU_EXIT_ID, 0, getString(R.string.menu_exit));
-		return true;
-	}
-
-	@Override
-	public boolean onKeyDown(int keyCode, KeyEvent event) {
-		if (keyCode == KeyEvent.KEYCODE_BACK) {
-			return true;
-		}
-		return super.onKeyDown(keyCode, event);
-	}
+	
 
 	public void click(int id, boolean mobilePage) {
 		if (authList.isEmpty()) {
 			Toast.makeText(this.getApplicationContext(), "No Auth available...", Toast.LENGTH_SHORT).show();
 			return;
 		}
-
+		Auth a = null;
+		if (id < authList.size() && authList.get(id) != null) {
+			a = authList.get(id);
+		} else {
+			return;
+		}
+		
 		Bundle b = new Bundle();
-		b.putInt(Constants.BUNDLE_KEY_ID, id);
-		b.putBoolean(Constants.BUNDLE_KEY_MOBILE, mobilePage);
+		b.putSerializable(BUNDLE_KEY_AUTH, a);
+		b.putBoolean(BUNDLE_KEY_MOBILE, mobilePage);
 
 		Intent intent = new Intent(ListenActivity.this, HijackActivity.class);
 		intent.putExtras(b);
@@ -552,9 +583,9 @@ public class ListenActivity extends Activity implements OnClickListener, OnItemC
 	}
 
 	private void startListening() {
-		if (Constants.DEBUG)
-			Log.d(Constants.APPLICATION_TAG, "START SPOOFING");
-		SystemHelper.execSUCommand(Constants.CLEANUP_COMMAND_DROIDSHEEP);
+		if (DEBUG)
+			Log.d(APPLICATION_TAG, "START SPOOFING");
+		SystemHelper.execSUCommand(CLEANUP_COMMAND_DROIDSHEEP, debugging);
 		updateNetworkSettings();
 
 		if (networkEncryptionWPA && !isSpoofing()) {
@@ -565,7 +596,7 @@ public class ListenActivity extends Activity implements OnClickListener, OnItemC
 		Button bstartstop = (Button) findViewById(R.id.bstartstop);
 
 		if (!isListening()) {
-			Intent intent = new Intent(this, ListenService.class);
+			Intent intent = new Intent(this, DroidSheepService.class);
 			try {
 				Thread.sleep(500);
 			} catch (InterruptedException e) {
@@ -588,8 +619,8 @@ public class ListenActivity extends Activity implements OnClickListener, OnItemC
 		button.setText("Start");
 		stopSpoofing();
 		stopListening();
-		SystemHelper.execNewSUCommand(Constants.CLEANUP_COMMAND_ARPSPOOF);
-		SystemHelper.execNewSUCommand(Constants.CLEANUP_COMMAND_DROIDSHEEP);
+		SystemHelper.execNewSUCommand(CLEANUP_COMMAND_ARPSPOOF, false);
+		SystemHelper.execNewSUCommand(CLEANUP_COMMAND_DROIDSHEEP, false);
 	}
 
 	private void refresh() {
@@ -599,7 +630,11 @@ public class ListenActivity extends Activity implements OnClickListener, OnItemC
 
 		Button bstartstop = (Button) findViewById(R.id.bstartstop);
 		if (listening) {
-			bstartstop.setText("Stop");
+			if (debugging) {
+				bstartstop.setText("Stop debugging");
+			} else {				
+				bstartstop.setText("Stop");
+			}
 		} else {
 			bstartstop.setText("Start");
 			mNotificationManager.cancelAll();
@@ -650,6 +685,12 @@ public class ListenActivity extends Activity implements OnClickListener, OnItemC
 			networkName = wifiInfo.getSSID() != null ? " " + wifiInfo.getSSID() : "";
 			tnetworkName.setText(getString(R.string.label_networkname_pref) + networkName.toUpperCase());
 		}
+		TextView tspoof = (TextView) findViewById(R.id.spoofaddress);
+		if (isSpoofing()) {
+			tspoof.setText("Spoofing IP: " + gatewayIP);
+		} else {
+			tspoof.setText("not spoofing any IP");
+		}
 	}
 
 	private void notifyUser(boolean persistent) {
@@ -672,16 +713,15 @@ public class ListenActivity extends Activity implements OnClickListener, OnItemC
 			notification.setLatestEventInfo(context, getString(R.string.notification_title),
 					getString(R.string.notification_text), contentIntent);
 		}
-		mNotificationManager.notify(Constants.NOTIFICATION_ID, notification);
+		mNotificationManager.notify(NOTIFICATION_ID, notification);
 	}
-
-	public void clearBlacklist() {
+	
+	private void askDebug() {
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setMessage(R.string.clear_blacklist).setCancelable(false)
+		builder.setMessage(R.string.popup_debug).setCancelable(false)
 				.setPositiveButton(R.string.button_ok, new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int id) {
-						DBHelper.clearBlacklist(ListenActivity.this);
-						AuthHelper.clearBlacklist();
+						ListenActivity.this.startDebug();
 					}
 				}).setNegativeButton(R.string.button_abprt, new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int id) {
@@ -691,31 +731,27 @@ public class ListenActivity extends Activity implements OnClickListener, OnItemC
 		AlertDialog alert = builder.create();
 		alert.show();
 	}
-
-	public void installBusyBox() {
-		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setMessage(R.string.installbusybox).setCancelable(false)
-				.setPositiveButton(R.string.button_ok, new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int id) {
-						Intent goToMarket = null;
-						goToMarket = new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=stericson.busybox"));
-						startActivity(goToMarket);
-						dialog.cancel();
-					}
-				}).setNegativeButton(R.string.button_abprt, new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int id) {
-						dialog.cancel();
-					}
-				});
-		AlertDialog alert = builder.create();
-		alert.show();
+	
+	private void startDebug() {
+		debugBuffer = new StringBuffer();
+		debugging = true;
+		debugBuffer.append("DEBUG SESSION START! ");
+		debugBuffer.append(new Date());
+		debugBuffer.append("\n");
+		
+		SystemHelper.debugInformation(this);
+		SetupHelper.debugInformation(this);
+		
+		stopListening();
+		stopSpoofing();
+		
+		SetupHelper.checkPrerequisites(this);
+		
+		Message m = handler.obtainMessage();
+		Bundle b = new Bundle();
+		b.putString(BUNDLE_KEY_TYPE, BUNDLE_TYPE_START);
+		m.setData(b);
+		handler.sendMessage(m);
 	}
 
-	@Override
-	public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-		if (buttonView.equals(cbgeneric)) {
-			ListenActivity.generic = isChecked;
-			DBHelper.setGeneric(this, isChecked);
-		}
-	}
 }
