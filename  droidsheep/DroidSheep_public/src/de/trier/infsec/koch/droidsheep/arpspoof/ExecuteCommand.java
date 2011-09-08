@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 
 import android.util.Log;
+import de.trier.infsec.koch.droidsheep.activities.ListenActivity;
 import de.trier.infsec.koch.droidsheep.auth.AuthHelper;
 import de.trier.infsec.koch.droidsheep.helper.Constants;
 
@@ -65,7 +66,6 @@ public class ExecuteCommand extends Thread {
 
 			public StreamGobbler(BufferedReader br) {
 				buffReader = br;
-
 			}
 
 			public void run() {
@@ -83,6 +83,9 @@ public class ExecuteCommand extends Thread {
 						}
 						if (Constants.DEBUG) {
 							Log.d(Constants.APPLICATION_TAG, line);
+						}
+						if (ListenActivity.debugging) {
+							ListenActivity.debugBuffer.append("command: " + command + "line: " + line + "\n");
 						}
 						if (listen) {							
 							AuthHelper.process(line);
@@ -106,7 +109,9 @@ public class ExecuteCommand extends Thread {
 		try {
 			if (Constants.DEBUG) {
 				Log.d(Constants.APPLICATION_TAG, "COMMAND: " + command);
-				
+			}
+			if (ListenActivity.debugging) {
+				ListenActivity.debugBuffer.append("executing command: " + command + "\n");
 			}
 			os.writeBytes(command + '\n');
 			os.flush();
@@ -130,6 +135,9 @@ public class ExecuteCommand extends Thread {
 			}
 		} catch (IOException e) {
 			Log.e(TAG, "error running commands", e);
+			if (ListenActivity.debugging) {
+				ListenActivity.debugBuffer.append(e);
+			}
 		} catch (InterruptedException e) {
 			try {
 				os.close();//key to killing executable and process
