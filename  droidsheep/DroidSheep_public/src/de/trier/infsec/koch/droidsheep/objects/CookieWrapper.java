@@ -26,7 +26,6 @@ import java.io.Serializable;
 
 import org.apache.http.impl.cookie.BasicClientCookie;
 
-
 public class CookieWrapper implements Serializable{
 	private static final long serialVersionUID = 7338603313707503698L;
 	

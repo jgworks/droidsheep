@@ -39,8 +39,6 @@ public class AuthListAdapter extends BaseAdapter {
 	public static final String AMAZON	= "http://www.amazon.de";
 	public static final String TWITTER 	= "http://www.twitter.com";
     
-//    private Hashtable<String, Auth> authList;
- 
     private Context context;
  
     public AuthListAdapter(Context context) {
