@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<authdefinitions>
+	<auth>
+		<name>Amazon</name>
+		<domain>amazon.de</domain>
+		<url>http://www.amazon.de</url>
+		<cookiename>x-acbde</cookiename>
+	</auth>
+	<auth>
+		<name>facebook</name>
+		<domain>facebook.com</domain>
+		<url>http://www.facebook.com</url>
+		<mobileurl>http://m.facebook.com</mobileurl>
+		<cookiename>c_user</cookiename>
+		<cookiename>datr</cookiename>
+		<cookiename>lu</cookiename>
+		<cookiename>xs</cookiename>
+	</auth>
+	<auth>
+		<name>flickr</name>
+		<domain>flickr.com</domain>
+		<url>http://www.flickr.com</url>
+		<mobileurl>http://m.flickr.com</mobileurl>
+		<cookiename>cookie_session</cookiename>
+	</auth>
+	<auth>
+		<name>Twitter</name>
+		<domain>twitter.com</domain>
+		<url>http://www.twitter.com</url>
+		<cookiename>auth_token</cookiename>
+		<cookiename>_twitter_sess</cookiename>
+	</auth>
+	<auth>
+		<name>LinkedIn</name>
+		<domain>linkedin.com</domain>
+		<url>http://www.linkedin.com</url>
+		<cookiename>bcookie</cookiename>
+		<cookiename>leo_auth_token</cookiename>
+	</auth>
+	<auth>
+		<name>Yahoo</name>
+		<domain>yahoo.com</domain>
+		<url>http://www.yahoo.com</url>
+		<mobileurl>http://mobile.yahoo.com</mobileurl>
+		<cookiename>T</cookiename>
+		<cookiename>Y</cookiename>
+	</auth>
+<!-- 	<auth>
+		<name>Wer-kennt-wen</name>
+		<domain>wer-kennt-wen.de</domain>
+		<url>http://www.wer-kennt-wen.de</url>
+		<cookiename>WKWSESSID</cookiename>
+		<cookiename>WKWSID</cookiename>
+	</auth> -->
+<!-- 	<auth>
+		<name>Windows live</name>
+		<domain>live.com</domain>
+		<url>http://mail.live.com</url>
+		<cookiename>RPSTAuth</cookiename>
+	</auth> -->
+	<auth>
+		<name>Google</name>
+		<domain>google.de</domain>
+		<url>http://www.google.de</url>
+		<cookiename>SID</cookiename>
+		<cookiename>NID</cookiename>
+		<cookiename>HSID</cookiename>
+		<cookiename>PREF</cookiename>
+	</auth>
+</authdefinitions>
