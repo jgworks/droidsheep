@@ -12,6 +12,7 @@
 		android:ellipsize="end"
 		android:lines="1"
 		android:textStyle="bold"
+		android:textSize="13dip"
 		android:textColor="#FFFFFF"
 		android:gravity="center_horizontal"
 		android:singleLine="true"
@@ -21,6 +22,7 @@
 		android:text="TEST"
 		android:id="@+id/spoofaddress"
 		android:ellipsize="end"
+		android:textSize="13dip"
 		android:lines="1"
 		android:textStyle="bold"
 		android:textColor="#FFFFFF"
@@ -41,8 +43,8 @@
 		android:gravity="center">
 		<CheckBox
 			android:id="@+id/cbarpspoof"
-			android:checked="true"
 			android:text="@string/cbarpspoof"
+			android:checked="true"
 			android:textSize="12sp"
 			android:layout_weight=".50"
 			android:textColor="#FFFFFF"
@@ -80,11 +82,11 @@
 			android:layout_height="wrap_content" />
 		<Button
 			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
 			android:layout_weight=".50"
 			android:id="@+id/bstartstop"
-			android:layout_height="wrap_content"
-			android:textSize="12sp"
 			android:enabled="true"
+			android:textSize="12sp"
 			android:layout_toRightOf="@id/status"
 			android:text="Start"></Button>
 	</LinearLayout>

@@ -11,7 +11,7 @@ import de.trier.infsec.koch.droidsheep.objects.CookieWrapper;
 public class AuthDefinitionGeneric extends AuthDefinition {
 
 	public AuthDefinitionGeneric() {
-		super(null, null, null, null, null);
+		super(null, null, null, null, null, null, null);
 	}
 
 	@Override
@@ -22,7 +22,7 @@ public class AuthDefinitionGeneric extends AuthDefinition {
 	public Auth getAuthFromCookieStringGeneric(String cookieListString) {
 		String[] lst = cookieListString.split("\\|\\|\\|");
 
-		if (lst.length < 2) {
+		if (lst.length < 3) {
 			Log.d(Constants.APPLICATION_TAG, "String not recognized: " + cookieListString);
 			return null;
 		}
@@ -64,7 +64,7 @@ public class AuthDefinitionGeneric extends AuthDefinition {
 
 			cookieList.add(new CookieWrapper(cookie, theurl));
 		}
-		return new Auth(cookieList, theurl, null, true);
+		return new Auth(cookieList, theurl, null, null, lst[2], "generic");
 	}
 
 }

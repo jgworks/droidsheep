@@ -35,15 +35,20 @@ public class Auth implements Serializable {
 	int id = 0; // Id contains a hash sum of all cookies in the object. 
 	boolean generic = true;
 	boolean saved = false;
+	String name = null;
+	String authName = null;
+	String ip = null;
 	
-	public Auth(ArrayList<CookieWrapper> cookieList, String url, String mobileUrl, boolean generic) {
+	public Auth(ArrayList<CookieWrapper> cookieList, String url, String mobileUrl, String name, String ip, String authName) {
 		this.cookieList = cookieList;
 		this.mobileurl = mobileUrl;
-		this.generic = generic;
+		this.authName = authName;
+		this.generic = authName.equalsIgnoreCase("generic");
 		this.url = url;
-		
+		this.ip = ip;
+		this.name = (name == null || name.equals(""))?url:name+" [" + url + "]";
 		for (CookieWrapper c : cookieList) {
-			this.id += c.getCookie().getValue().hashCode();
+			id += c.getCookie().getValue().hashCode();
 		}
 	}
 	
@@ -70,11 +75,15 @@ public class Auth implements Serializable {
 	}
 
 	public String getName() {
-		return url;
+		return name;
 	}
 
 	public String getUrl() {
 		return url;
+	}
+	
+	public String getIp() {
+		return ip;
 	}
 
 	public String getMobileUrl() {

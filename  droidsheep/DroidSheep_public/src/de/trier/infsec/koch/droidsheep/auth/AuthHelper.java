@@ -21,6 +21,7 @@ package de.trier.infsec.koch.droidsheep.auth;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -63,6 +64,8 @@ public class AuthHelper {
 		String name 		= null;
 		String url 			= null;
 		String domain 		= null;
+		String idurl 		= null;
+		String regexp 		= null;
 		ArrayList<String> cookieNames = new ArrayList<String>();
 		
 		while (eventType != XmlPullParser.END_DOCUMENT) {
@@ -71,6 +74,8 @@ public class AuthHelper {
 				url = null;
 				mobileurl = null;
 				domain = null;
+				idurl = null;
+				regexp = null;
 				cookieNames = new ArrayList<String>();
 			}
 			while (!(eventType == XmlPullParser.END_TAG && xpp.getName().equals("auth")) && eventType != XmlPullParser.END_DOCUMENT) {
@@ -90,12 +95,18 @@ public class AuthHelper {
 					} else if (xpp.getName().equals("mobileurl")) {
 						xpp.next();
 						mobileurl = xpp.getText();
+					} else if (xpp.getName().equals("idurl")) {
+						xpp.next();
+						idurl = xpp.getText();
+					} else if (xpp.getName().equals("regexp")) {
+						xpp.next();
+						regexp = xpp.getText();
 					}
 				}
 				eventType = xpp.next();
 			}
 			if (name!= null && url != null && domain != null && cookieNames != null && !cookieNames.isEmpty()) {
-				authDefList.put(name, new AuthDefinition(cookieNames, url, mobileurl, domain, name));
+				authDefList.put(name, new AuthDefinition(cookieNames, url, mobileurl, domain, name, idurl, regexp));
 			}
 			eventType = xpp.next();
 		}
@@ -104,7 +115,9 @@ public class AuthHelper {
 		}
 	}
 
-	public static Auth match(String line) {
+	public static List<Auth> match(String line) {
+		List<Auth> lst = new ArrayList<Auth>();
+		lst.clear();
 		for (String key : authDefList.keySet()) {
 			AuthDefinition ad = authDefList.get(key);
 			Auth a = ad.getAuthFromCookieString(line);
@@ -113,33 +126,33 @@ public class AuthHelper {
 					Log.d(Constants.APPLICATION_TAG, "MATCH:" + a.getName());
 				}
 				if (blacklist.containsKey(a.getName())) {
-					return null;
-				}
-				return a;
+					continue;
+				} 
+				lst.add(a);
 			}
 		}
-		if (ListenActivity.generic && generic != null) {
+		if (ListenActivity.generic && generic != null && lst.isEmpty()) {
 			Auth a = generic.getAuthFromCookieString(line);
-			if (a == null || a.getName() == null) {
-				return null;
+			if (a != null && a.getName() != null) {
+				if (!blacklist.containsKey(a.getName())) {
+					lst.add(a);
+				}
 			}
-			if (blacklist.containsKey(a.getName())) {
-				return null;
-			}
-			return a;
 		}
-		return null;
+		return lst;
 	}
 		
 	public static void process (String line) {
-		Auth a = match(line);
-		if (a != null) {
-			Message m = handler.obtainMessage();
-			Bundle bundle = new Bundle();
-			bundle.putSerializable(Constants.BUNDLE_KEY_AUTH, a);
-			bundle.putString(Constants.BUNDLE_KEY_TYPE, Constants.BUNDLE_TYPE_NEWAUTH);
-			m.setData(bundle);
-			handler.sendMessage(m);
+		List<Auth> lstAuth = match(line); 
+		if (lstAuth != null && !lstAuth.isEmpty()) {
+			for (Auth a : lstAuth) {
+				Message m = handler.obtainMessage();
+				Bundle bundle = new Bundle();
+				bundle.putSerializable(Constants.BUNDLE_KEY_AUTH, a);
+				bundle.putString(Constants.BUNDLE_KEY_TYPE, Constants.BUNDLE_TYPE_NEWAUTH);
+				m.setData(bundle);
+				handler.sendMessage(m);
+			}
 		}
 	}
 

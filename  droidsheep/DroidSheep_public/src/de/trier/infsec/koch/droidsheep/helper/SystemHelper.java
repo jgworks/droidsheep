@@ -173,7 +173,10 @@ public class SystemHelper {
 		}
 		File f = new File(c.getFilesDir() + File.separator + "saved" + File.separator + "droidsheep" + a.getId());
 		if (f.exists()) {
-			f.delete();
+			for (int i = 0; i < 5; i++) {
+				if (f.delete()) break; // In case deletion fails, retry 5 times...
+			}
+			
 		}
 		a.setSaved(false);
 	}
@@ -196,7 +199,7 @@ public class SystemHelper {
 				Message m = handler.obtainMessage();
 				Bundle bundle = new Bundle();
 				bundle.putSerializable(Constants.BUNDLE_KEY_AUTH, object);
-				bundle.putString(Constants.BUNDLE_KEY_TYPE, Constants.BUNDLE_TYPE_NEWAUTH);
+				bundle.putString(Constants.BUNDLE_KEY_TYPE, Constants.BUNDLE_TYPE_LOADAUTH);
 				m.setData(bundle);
 				handler.sendMessage(m);
 			} catch (Exception e) {

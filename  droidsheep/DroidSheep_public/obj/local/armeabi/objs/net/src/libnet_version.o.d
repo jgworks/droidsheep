@@ -1,5 +1,5 @@
-/cygdrive/d/Development/svn-workspace/DroidSheep_public/obj/local/armeabi/objs/net/src/libnet_version.o: \
- /cygdrive/d/Development/svn-workspace/DroidSheep_public/jni/libnet/src/libnet_version.c \
+/cygdrive/d/Development/svn-workspace/arpspoof/obj/local/armeabi/objs/net/src/libnet_version.o: \
+ /cygdrive/d/Development/svn-workspace/arpspoof/jni/libnet/src/libnet_version.c \
  /cygdrive/d/Development/android-ndk-r6/platforms/android-5/arch-arm/usr/include/unistd.h \
  /cygdrive/d/Development/android-ndk-r6/platforms/android-5/arch-arm/usr/include/sys/cdefs.h \
  /cygdrive/d/Development/android-ndk-r6/platforms/android-5/arch-arm/usr/include/sys/cdefs_elf.h \
@@ -34,7 +34,7 @@
  /cygdrive/d/Development/android-ndk-r6/platforms/android-5/arch-arm/usr/include/sys/sysconf.h \
  /cygdrive/d/Development/android-ndk-r6/platforms/android-5/arch-arm/usr/include/linux/capability.h \
  /cygdrive/d/Development/android-ndk-r6/platforms/android-5/arch-arm/usr/include/pathconf.h \
- /cygdrive/d/Development/svn-workspace/DroidSheep_public/jni/libnet/src/../version.h
+ /cygdrive/d/Development/svn-workspace/arpspoof/jni/libnet/src/../version.h
 
 /cygdrive/d/Development/android-ndk-r6/platforms/android-5/arch-arm/usr/include/unistd.h:
 
@@ -104,4 +104,4 @@
 
 /cygdrive/d/Development/android-ndk-r6/platforms/android-5/arch-arm/usr/include/pathconf.h:
 
-/cygdrive/d/Development/svn-workspace/DroidSheep_public/jni/libnet/src/../version.h:
+/cygdrive/d/Development/svn-workspace/arpspoof/jni/libnet/src/../version.h:

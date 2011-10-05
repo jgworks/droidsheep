@@ -49,4 +49,5 @@
 	<string name="donate_no">No, I´m not interested.</string>
 	<string name="donate_yes">Yes, your work is worth it!</string>
 	
+	<string name="updatetext">There is an update available!\nActually there is no automatic update mechanism, but you can uninstall DroidSheep and open "http://www.droidsheep.de" to grab the new version manually from the download section.\nChanges: </string>
 </resources>

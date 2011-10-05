@@ -112,4 +112,35 @@ public class DBHelper {
 		}
 		droidsheepDB.close();
 	}
+	
+	public static void setLastUpdateCheck(Context c, long date) {
+		initDB(c);
+		Cursor cur = droidsheepDB.rawQuery("SELECT count(id) as count FROM DROIDSHEEP_PREFERENCES where name = 'update';", new String[] {});
+		cur.moveToFirst();
+		int count = (int) cur.getLong(cur.getColumnIndex("count"));
+		if (count == 0) {
+			droidsheepDB.execSQL("INSERT INTO DROIDSHEEP_PREFERENCES (name, value) values ('update', ?);",
+					new String[] { Long.toString(date) });
+		} else {
+			droidsheepDB.execSQL("UPDATE DROIDSHEEP_PREFERENCES SET value=? WHERE name='update';",
+					new String[] { Long.toString(date) });
+		}
+		droidsheepDB.close();
+	}
+	
+	public static long getLastUpdateMessage(Context c) {
+		try {
+			initDB(c);
+			Cursor cur = droidsheepDB.rawQuery("SELECT value FROM DROIDSHEEP_PREFERENCES where name = 'update';",
+					new String[] {});
+			cur.moveToFirst();
+			long datetime = cur.getLong(cur.getColumnIndex("value"));
+			return datetime;
+		} catch (Exception e) {
+			Log.d(Constants.APPLICATION_TAG, "Could not load last update datetime: " + e.getLocalizedMessage());
+		} finally {
+			droidsheepDB.close();
+		}
+		return 0L;
+	}
 }

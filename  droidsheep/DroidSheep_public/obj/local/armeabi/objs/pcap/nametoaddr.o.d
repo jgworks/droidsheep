@@ -1,6 +1,6 @@
-/cygdrive/d/Development/svn-workspace/DroidSheep_public/obj/local/armeabi/objs/pcap/nametoaddr.o: \
- /cygdrive/d/Development/svn-workspace/DroidSheep_public/jni/libpcap/nametoaddr.c \
- /cygdrive/d/Development/svn-workspace/DroidSheep_public/jni/libpcap/config.h \
+/cygdrive/d/Development/svn-workspace/arpspoof/obj/local/armeabi/objs/pcap/nametoaddr.o: \
+ /cygdrive/d/Development/svn-workspace/arpspoof/jni/libpcap/nametoaddr.c \
+ /cygdrive/d/Development/svn-workspace/arpspoof/jni/libpcap/config.h \
  /cygdrive/d/Development/android-ndk-r6/platforms/android-5/arch-arm/usr/include/sys/param.h \
  /cygdrive/d/Development/android-ndk-r6/platforms/android-5/arch-arm/usr/include/limits.h \
  /cygdrive/d/Development/android-ndk-r6/platforms/android-5/arch-arm/usr/include/sys/cdefs.h \
@@ -57,15 +57,15 @@
  /cygdrive/d/Development/android-ndk-r6/platforms/android-5/arch-arm/usr/include/strings.h \
  /cygdrive/d/Development/android-ndk-r6/platforms/android-5/arch-arm/usr/include/memory.h \
  /cygdrive/d/Development/android-ndk-r6/platforms/android-5/arch-arm/usr/include/stdio.h \
- /cygdrive/d/Development/svn-workspace/DroidSheep_public/jni/libpcap/pcap-int.h \
- /cygdrive/d/Development/svn-workspace/DroidSheep_public/jni/libpcap/pcap.h \
- /cygdrive/d/Development/svn-workspace/DroidSheep_public/jni/libpcap/pcap-bpf.h \
- /cygdrive/d/Development/svn-workspace/DroidSheep_public/jni/libpcap/gencode.h \
- /cygdrive/d/Development/svn-workspace/DroidSheep_public/jni/libpcap/pcap-namedb.h \
- /cygdrive/d/Development/svn-workspace/DroidSheep_public/jni/libpcap/ethertype.h \
- /cygdrive/d/Development/svn-workspace/DroidSheep_public/jni/libpcap/llc.h
+ /cygdrive/d/Development/svn-workspace/arpspoof/jni/libpcap/pcap-int.h \
+ /cygdrive/d/Development/svn-workspace/arpspoof/jni/libpcap/pcap.h \
+ /cygdrive/d/Development/svn-workspace/arpspoof/jni/libpcap/pcap-bpf.h \
+ /cygdrive/d/Development/svn-workspace/arpspoof/jni/libpcap/gencode.h \
+ /cygdrive/d/Development/svn-workspace/arpspoof/jni/libpcap/pcap-namedb.h \
+ /cygdrive/d/Development/svn-workspace/arpspoof/jni/libpcap/ethertype.h \
+ /cygdrive/d/Development/svn-workspace/arpspoof/jni/libpcap/llc.h
 
-/cygdrive/d/Development/svn-workspace/DroidSheep_public/jni/libpcap/config.h:
+/cygdrive/d/Development/svn-workspace/arpspoof/jni/libpcap/config.h:
 
 /cygdrive/d/Development/android-ndk-r6/platforms/android-5/arch-arm/usr/include/sys/param.h:
 
@@ -179,16 +179,16 @@
 
 /cygdrive/d/Development/android-ndk-r6/platforms/android-5/arch-arm/usr/include/stdio.h:
 
-/cygdrive/d/Development/svn-workspace/DroidSheep_public/jni/libpcap/pcap-int.h:
+/cygdrive/d/Development/svn-workspace/arpspoof/jni/libpcap/pcap-int.h:
 
-/cygdrive/d/Development/svn-workspace/DroidSheep_public/jni/libpcap/pcap.h:
+/cygdrive/d/Development/svn-workspace/arpspoof/jni/libpcap/pcap.h:
 
-/cygdrive/d/Development/svn-workspace/DroidSheep_public/jni/libpcap/pcap-bpf.h:
+/cygdrive/d/Development/svn-workspace/arpspoof/jni/libpcap/pcap-bpf.h:
 
-/cygdrive/d/Development/svn-workspace/DroidSheep_public/jni/libpcap/gencode.h:
+/cygdrive/d/Development/svn-workspace/arpspoof/jni/libpcap/gencode.h:
 
-/cygdrive/d/Development/svn-workspace/DroidSheep_public/jni/libpcap/pcap-namedb.h:
+/cygdrive/d/Development/svn-workspace/arpspoof/jni/libpcap/pcap-namedb.h:
 
-/cygdrive/d/Development/svn-workspace/DroidSheep_public/jni/libpcap/ethertype.h:
+/cygdrive/d/Development/svn-workspace/arpspoof/jni/libpcap/ethertype.h:
 
-/cygdrive/d/Development/svn-workspace/DroidSheep_public/jni/libpcap/llc.h:
+/cygdrive/d/Development/svn-workspace/arpspoof/jni/libpcap/llc.h:

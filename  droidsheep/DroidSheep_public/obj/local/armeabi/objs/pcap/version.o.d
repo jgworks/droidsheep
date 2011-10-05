@@ -1,2 +1,2 @@
-/cygdrive/d/Development/svn-workspace/DroidSheep_public/obj/local/armeabi/objs/pcap/version.o: \
- /cygdrive/d/Development/svn-workspace/DroidSheep_public/jni/libpcap/version.c
+/cygdrive/d/Development/svn-workspace/arpspoof/obj/local/armeabi/objs/pcap/version.o: \
+ /cygdrive/d/Development/svn-workspace/arpspoof/jni/libpcap/version.c

@@ -1,6 +1,6 @@
-/cygdrive/d/Development/svn-workspace/DroidSheep_public/obj/local/armeabi/objs/pcap/bpf/net/bpf_filter.o: \
- /cygdrive/d/Development/svn-workspace/DroidSheep_public/jni/libpcap/bpf/net/bpf_filter.c \
- /cygdrive/d/Development/svn-workspace/DroidSheep_public/jni/libpcap/config.h \
+/cygdrive/d/Development/svn-workspace/arpspoof/obj/local/armeabi/objs/pcap/bpf/net/bpf_filter.o: \
+ /cygdrive/d/Development/svn-workspace/arpspoof/jni/libpcap/bpf/net/bpf_filter.c \
+ /cygdrive/d/Development/svn-workspace/arpspoof/jni/libpcap/config.h \
  /cygdrive/d/Development/android-ndk-r6/platforms/android-5/arch-arm/usr/include/sys/param.h \
  /cygdrive/d/Development/android-ndk-r6/platforms/android-5/arch-arm/usr/include/limits.h \
  /cygdrive/d/Development/android-ndk-r6/platforms/android-5/arch-arm/usr/include/sys/cdefs.h \
@@ -26,7 +26,7 @@
  /cygdrive/d/Development/android-ndk-r6/platforms/android-5/arch-arm/usr/include/sys/sysmacros.h \
  /cygdrive/d/Development/android-ndk-r6/platforms/android-5/arch-arm/usr/include/sys/time.h \
  /cygdrive/d/Development/android-ndk-r6/platforms/android-5/arch-arm/usr/include/linux/time.h \
- /cygdrive/d/Development/svn-workspace/DroidSheep_public/jni/libpcap/pcap-bpf.h \
+ /cygdrive/d/Development/svn-workspace/arpspoof/jni/libpcap/pcap-bpf.h \
  /cygdrive/d/Development/android-ndk-r6/platforms/android-5/arch-arm/usr/include/stdlib.h \
  /cygdrive/d/Development/android-ndk-r6/platforms/android-5/arch-arm/usr/include/string.h \
  /cygdrive/d/Development/android-ndk-r6/platforms/android-5/arch-arm/usr/include/malloc.h \
@@ -34,7 +34,7 @@
  /cygdrive/d/Development/android-ndk-r6/platforms/android-5/arch-arm/usr/include/strings.h \
  /cygdrive/d/Development/android-ndk-r6/platforms/android-5/arch-arm/usr/include/memory.h
 
-/cygdrive/d/Development/svn-workspace/DroidSheep_public/jni/libpcap/config.h:
+/cygdrive/d/Development/svn-workspace/arpspoof/jni/libpcap/config.h:
 
 /cygdrive/d/Development/android-ndk-r6/platforms/android-5/arch-arm/usr/include/sys/param.h:
 
@@ -86,7 +86,7 @@
 
 /cygdrive/d/Development/android-ndk-r6/platforms/android-5/arch-arm/usr/include/linux/time.h:
 
-/cygdrive/d/Development/svn-workspace/DroidSheep_public/jni/libpcap/pcap-bpf.h:
+/cygdrive/d/Development/svn-workspace/arpspoof/jni/libpcap/pcap-bpf.h:
 
 /cygdrive/d/Development/android-ndk-r6/platforms/android-5/arch-arm/usr/include/stdlib.h:
 

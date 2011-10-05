@@ -196,6 +196,7 @@ void print_app_usage(void) {
 	return;
 }
 
+const struct sniff_ip *ip; /* The IP header */
 char host[256];
 char cookie[50000];
 int host_idx = 0;
@@ -259,7 +260,7 @@ void print_cookies(const u_char *payload, int len) {
 		} else if (mode == 7 && c == '\n') {
 			cookie[cookie_idx] = '\0';
 			host[host_idx] = '\0';
-			printf("Cookie:%s|||Host=%s\n", cookie, host);
+			printf("Cookie:%s|||Host=%s|||IP=%s\n", cookie, host, inet_ntoa(ip->ip_src));
 			fflush(stdout);
 			truncated = 0;
 			mode = 0;
@@ -307,6 +308,8 @@ void print_cookies(const u_char *payload, int len) {
 	return;
 }
 
+
+
 void got_packet(u_char *args, const struct pcap_pkthdr *header,
 		const u_char *packet) {
 
@@ -314,7 +317,6 @@ void got_packet(u_char *args, const struct pcap_pkthdr *header,
 
 	/* declare pointers to packet headers */
 	const struct sniff_ethernet *ethernet; /* The ethernet header [1] */
-	const struct sniff_ip *ip; /* The IP header */
 	const struct sniff_tcp *tcp; /* The TCP header */
 	const char *payload; /* Packet payload */
 

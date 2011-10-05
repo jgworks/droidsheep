@@ -1,6 +1,6 @@
-/cygdrive/d/Development/svn-workspace/DroidSheep_public/obj/local/armeabi/objs/pcap/optimize.o: \
- /cygdrive/d/Development/svn-workspace/DroidSheep_public/jni/libpcap/optimize.c \
- /cygdrive/d/Development/svn-workspace/DroidSheep_public/jni/libpcap/config.h \
+/cygdrive/d/Development/svn-workspace/arpspoof/obj/local/armeabi/objs/pcap/optimize.o: \
+ /cygdrive/d/Development/svn-workspace/arpspoof/jni/libpcap/optimize.c \
+ /cygdrive/d/Development/svn-workspace/arpspoof/jni/libpcap/config.h \
  /cygdrive/d/Development/android-ndk-r6/platforms/android-5/arch-arm/usr/include/stdio.h \
  /cygdrive/d/Development/android-ndk-r6/platforms/android-5/arch-arm/usr/include/sys/cdefs.h \
  /cygdrive/d/Development/android-ndk-r6/platforms/android-5/arch-arm/usr/include/sys/cdefs_elf.h \
@@ -27,15 +27,15 @@
  /cygdrive/d/Development/android-ndk-r6/platforms/android-5/arch-arm/usr/include/asm/errno.h \
  /cygdrive/d/Development/android-ndk-r6/platforms/android-5/arch-arm/usr/include/asm-generic/errno.h \
  /cygdrive/d/Development/android-ndk-r6/platforms/android-5/arch-arm/usr/include/asm-generic/errno-base.h \
- /cygdrive/d/Development/svn-workspace/DroidSheep_public/jni/libpcap/pcap-int.h \
- /cygdrive/d/Development/svn-workspace/DroidSheep_public/jni/libpcap/pcap.h \
+ /cygdrive/d/Development/svn-workspace/arpspoof/jni/libpcap/pcap-int.h \
+ /cygdrive/d/Development/svn-workspace/arpspoof/jni/libpcap/pcap.h \
  /cygdrive/d/Development/android-ndk-r6/platforms/android-5/arch-arm/usr/include/sys/time.h \
  /cygdrive/d/Development/android-ndk-r6/platforms/android-5/arch-arm/usr/include/linux/time.h \
- /cygdrive/d/Development/svn-workspace/DroidSheep_public/jni/libpcap/pcap-bpf.h \
- /cygdrive/d/Development/svn-workspace/DroidSheep_public/jni/libpcap/gencode.h \
- /cygdrive/d/Development/svn-workspace/DroidSheep_public/jni/libpcap/ffs.h
+ /cygdrive/d/Development/svn-workspace/arpspoof/jni/libpcap/pcap-bpf.h \
+ /cygdrive/d/Development/svn-workspace/arpspoof/jni/libpcap/gencode.h \
+ /cygdrive/d/Development/svn-workspace/arpspoof/jni/libpcap/ffs.h
 
-/cygdrive/d/Development/svn-workspace/DroidSheep_public/jni/libpcap/config.h:
+/cygdrive/d/Development/svn-workspace/arpspoof/jni/libpcap/config.h:
 
 /cygdrive/d/Development/android-ndk-r6/platforms/android-5/arch-arm/usr/include/stdio.h:
 
@@ -89,16 +89,16 @@
 
 /cygdrive/d/Development/android-ndk-r6/platforms/android-5/arch-arm/usr/include/asm-generic/errno-base.h:
 
-/cygdrive/d/Development/svn-workspace/DroidSheep_public/jni/libpcap/pcap-int.h:
+/cygdrive/d/Development/svn-workspace/arpspoof/jni/libpcap/pcap-int.h:
 
-/cygdrive/d/Development/svn-workspace/DroidSheep_public/jni/libpcap/pcap.h:
+/cygdrive/d/Development/svn-workspace/arpspoof/jni/libpcap/pcap.h:
 
 /cygdrive/d/Development/android-ndk-r6/platforms/android-5/arch-arm/usr/include/sys/time.h:
 
 /cygdrive/d/Development/android-ndk-r6/platforms/android-5/arch-arm/usr/include/linux/time.h:
 
-/cygdrive/d/Development/svn-workspace/DroidSheep_public/jni/libpcap/pcap-bpf.h:
+/cygdrive/d/Development/svn-workspace/arpspoof/jni/libpcap/pcap-bpf.h:
 
-/cygdrive/d/Development/svn-workspace/DroidSheep_public/jni/libpcap/gencode.h:
+/cygdrive/d/Development/svn-workspace/arpspoof/jni/libpcap/gencode.h:
 
-/cygdrive/d/Development/svn-workspace/DroidSheep_public/jni/libpcap/ffs.h:
+/cygdrive/d/Development/svn-workspace/arpspoof/jni/libpcap/ffs.h:

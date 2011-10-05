@@ -88,7 +88,7 @@ public class ListenActivity extends Activity implements OnClickListener, OnItemC
 
 	private static ArrayList<Auth> authListUnsynchronized = new ArrayList<Auth>();
 	public static List<Auth> authList = Collections.synchronizedList(authListUnsynchronized);
-
+	
 	public static boolean disclaimerAccepted = false;
 
 	private SessionListView sessionListView;
@@ -108,10 +108,9 @@ public class ListenActivity extends Activity implements OnClickListener, OnItemC
 
 	private int lastNotification = 0;
 	private NotificationManager mNotificationManager = null;
-	
+
 	public static StringBuffer debugBuffer = null;
 	public static boolean debugging = false;
-	
 
 	public static boolean generic = true;
 	private Handler handler = new Handler() {
@@ -135,7 +134,29 @@ public class ListenActivity extends Activity implements OnClickListener, OnItemC
 				}
 				Auth a = (Auth) serializable;
 				if (!authList.contains(a)) {
-					ListenActivity.authList.add(a);
+					if (!a.isGeneric()) {						
+						ListenActivity.authList.add(0, a);
+					} else {
+						ListenActivity.authList.add(a);
+					}
+				} else {
+					int pos = authList.indexOf(a);
+					if (!authList.get(pos).isSaved()) {
+						authList.remove(pos);
+					}
+					authList.add(pos, a);
+				}
+				ListenActivity.this.refresh();
+				ListenActivity.this.notifyUser(false);
+			} else if (type != null && type.equals(BUNDLE_TYPE_LOADAUTH)) {
+				Serializable serializable = msg.getData().getSerializable(BUNDLE_KEY_AUTH);
+				if (serializable == null || !(serializable instanceof Auth)) {
+					Log.e(APPLICATION_TAG, "ERROR with serializable. Null or not an instance!");
+					return;
+				}
+				Auth a = (Auth) serializable;
+				if (!authList.contains(a)) {
+					ListenActivity.authList.add(0, a);
 				}
 				ListenActivity.this.refresh();
 				ListenActivity.this.notifyUser(false);
@@ -192,20 +213,19 @@ public class ListenActivity extends Activity implements OnClickListener, OnItemC
 		}
 	}
 
-	
 	// ############################################################################
 	//                           START LIFECYCLE METHODS
 	// ############################################################################
-	
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
+
 		if (DEBUG)
 			Log.d(APPLICATION_TAG, "ONCREATE");
-		
+
 		SetupHelper.checkPrerequisites(this.getApplicationContext());
-		
+
 		AuthHelper.init(this.getApplicationContext(), handler);
 		WifiChangeChecker wi = new WifiChangeChecker(handler);
 		this.getApplicationContext().registerReceiver(wi, new IntentFilter(WifiManager.WIFI_STATE_CHANGED_ACTION));
@@ -223,6 +243,7 @@ public class ListenActivity extends Activity implements OnClickListener, OnItemC
 		if (DEBUG)
 			Log.d(APPLICATION_TAG, "ONSTART");
 		setContentView(R.layout.listen);
+
 		Button button = (Button) findViewById(R.id.bstartstop);
 
 		button.setOnClickListener(this);
@@ -244,7 +265,19 @@ public class ListenActivity extends Activity implements OnClickListener, OnItemC
 		mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 		ListenActivity.generic = DBHelper.getGeneric(this);
 		cbgeneric.setChecked(ListenActivity.generic);
+		showUpdate();
 		DialogHelper.showDisclaimer(this);
+	}
+
+	private void showUpdate() {
+		long last = DBHelper.getLastUpdateMessage(this);
+		long now = System.currentTimeMillis();
+		long dif = now - last;
+
+		if (dif > (7 * 24 * 60 * 60 * 1000)) {  // show once a week
+			DialogHelper.downloadUpdate(this);
+			DBHelper.setLastUpdateCheck(this, System.currentTimeMillis());
+		}
 	}
 
 	@Override
@@ -268,20 +301,14 @@ public class ListenActivity extends Activity implements OnClickListener, OnItemC
 		}
 		super.onDestroy();
 	}
-	
-	
+
 	// ############################################################################
 	//                           END LIFECYCLE METHODS
 	// ############################################################################
 
-	
-	
-	
-	
 	// ############################################################################
 	//                           START LISTENER METHODS
 	// ############################################################################
-
 
 	@Override
 	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -395,11 +422,11 @@ public class ListenActivity extends Activity implements OnClickListener, OnItemC
 			handler.sendMessage(m);
 		}
 	}
-	
+
 	@Override
 	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
 		Auth actElem = null;
-		if (sessionListViewSelected >= authList.size()) 
+		if (sessionListViewSelected >= authList.size())
 			return;
 		actElem = authList.get(sessionListViewSelected);
 		menu.setHeaderTitle(getString(R.string.menu_choose_page_title));
@@ -451,7 +478,7 @@ public class ListenActivity extends Activity implements OnClickListener, OnItemC
 		}
 		return super.onKeyDown(keyCode, event);
 	}
-	
+
 	@Override
 	public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
 		if (buttonView.equals(cbgeneric)) {
@@ -459,17 +486,11 @@ public class ListenActivity extends Activity implements OnClickListener, OnItemC
 			DBHelper.setGeneric(this, isChecked);
 		}
 	}
-	
+
 	// ############################################################################
 	//                           END LISTENER METHODS
 	// ############################################################################
 
-	
-	
-	
-	
-	
-	
 	private void startSpoofing() {
 		if (DEBUG)
 			Log.d(APPLICATION_TAG, "START SPOOFING");
@@ -559,8 +580,6 @@ public class ListenActivity extends Activity implements OnClickListener, OnItemC
 		return false;
 	}
 
-	
-
 	public void click(int id, boolean mobilePage) {
 		if (authList.isEmpty()) {
 			Toast.makeText(this.getApplicationContext(), "No Auth available...", Toast.LENGTH_SHORT).show();
@@ -572,7 +591,7 @@ public class ListenActivity extends Activity implements OnClickListener, OnItemC
 		} else {
 			return;
 		}
-		
+
 		Bundle b = new Bundle();
 		b.putSerializable(BUNDLE_KEY_AUTH, a);
 		b.putBoolean(BUNDLE_KEY_MOBILE, mobilePage);
@@ -632,7 +651,7 @@ public class ListenActivity extends Activity implements OnClickListener, OnItemC
 		if (listening) {
 			if (debugging) {
 				bstartstop.setText("Stop debugging");
-			} else {				
+			} else {
 				bstartstop.setText("Stop");
 			}
 		} else {
@@ -715,7 +734,7 @@ public class ListenActivity extends Activity implements OnClickListener, OnItemC
 		}
 		mNotificationManager.notify(NOTIFICATION_ID, notification);
 	}
-	
+
 	private void askDebug() {
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		builder.setMessage(R.string.popup_debug).setCancelable(false)
@@ -731,22 +750,22 @@ public class ListenActivity extends Activity implements OnClickListener, OnItemC
 		AlertDialog alert = builder.create();
 		alert.show();
 	}
-	
+
 	private void startDebug() {
 		debugBuffer = new StringBuffer();
 		debugging = true;
 		debugBuffer.append("DEBUG SESSION START! ");
 		debugBuffer.append(new Date());
 		debugBuffer.append("\n");
-		
+
 		SystemHelper.debugInformation(this);
 		SetupHelper.debugInformation(this);
-		
+
 		stopListening();
 		stopSpoofing();
-		
+
 		SetupHelper.checkPrerequisites(this);
-		
+
 		Message m = handler.obtainMessage();
 		Bundle b = new Bundle();
 		b.putString(BUNDLE_KEY_TYPE, BUNDLE_TYPE_START);

@@ -1,6 +1,6 @@
-/cygdrive/d/Development/svn-workspace/DroidSheep_public/obj/local/armeabi/objs/pcap/bpf_image.o: \
- /cygdrive/d/Development/svn-workspace/DroidSheep_public/jni/libpcap/bpf_image.c \
- /cygdrive/d/Development/svn-workspace/DroidSheep_public/jni/libpcap/config.h \
+/cygdrive/d/Development/svn-workspace/arpspoof/obj/local/armeabi/objs/pcap/bpf_image.o: \
+ /cygdrive/d/Development/svn-workspace/arpspoof/jni/libpcap/bpf_image.c \
+ /cygdrive/d/Development/svn-workspace/arpspoof/jni/libpcap/config.h \
  /cygdrive/d/Development/android-ndk-r6/platforms/android-5/arch-arm/usr/include/stdio.h \
  /cygdrive/d/Development/android-ndk-r6/platforms/android-5/arch-arm/usr/include/sys/cdefs.h \
  /cygdrive/d/Development/android-ndk-r6/platforms/android-5/arch-arm/usr/include/sys/cdefs_elf.h \
@@ -18,13 +18,13 @@
  /cygdrive/d/Development/android-ndk-r6/platforms/android-5/arch-arm/usr/include/sys/sysmacros.h \
  /cygdrive/d/Development/android-ndk-r6/platforms/android-5/arch-arm/usr/include/string.h \
  /cygdrive/d/Development/android-ndk-r6/platforms/android-5/arch-arm/usr/include/malloc.h \
- /cygdrive/d/Development/svn-workspace/DroidSheep_public/jni/libpcap/pcap-int.h \
- /cygdrive/d/Development/svn-workspace/DroidSheep_public/jni/libpcap/pcap.h \
+ /cygdrive/d/Development/svn-workspace/arpspoof/jni/libpcap/pcap-int.h \
+ /cygdrive/d/Development/svn-workspace/arpspoof/jni/libpcap/pcap.h \
  /cygdrive/d/Development/android-ndk-r6/platforms/android-5/arch-arm/usr/include/sys/time.h \
  /cygdrive/d/Development/android-ndk-r6/platforms/android-5/arch-arm/usr/include/linux/time.h \
- /cygdrive/d/Development/svn-workspace/DroidSheep_public/jni/libpcap/pcap-bpf.h
+ /cygdrive/d/Development/svn-workspace/arpspoof/jni/libpcap/pcap-bpf.h
 
-/cygdrive/d/Development/svn-workspace/DroidSheep_public/jni/libpcap/config.h:
+/cygdrive/d/Development/svn-workspace/arpspoof/jni/libpcap/config.h:
 
 /cygdrive/d/Development/android-ndk-r6/platforms/android-5/arch-arm/usr/include/stdio.h:
 
@@ -60,12 +60,12 @@
 
 /cygdrive/d/Development/android-ndk-r6/platforms/android-5/arch-arm/usr/include/malloc.h:
 
-/cygdrive/d/Development/svn-workspace/DroidSheep_public/jni/libpcap/pcap-int.h:
+/cygdrive/d/Development/svn-workspace/arpspoof/jni/libpcap/pcap-int.h:
 
-/cygdrive/d/Development/svn-workspace/DroidSheep_public/jni/libpcap/pcap.h:
+/cygdrive/d/Development/svn-workspace/arpspoof/jni/libpcap/pcap.h:
 
 /cygdrive/d/Development/android-ndk-r6/platforms/android-5/arch-arm/usr/include/sys/time.h:
 
 /cygdrive/d/Development/android-ndk-r6/platforms/android-5/arch-arm/usr/include/linux/time.h:
 
-/cygdrive/d/Development/svn-workspace/DroidSheep_public/jni/libpcap/pcap-bpf.h:
+/cygdrive/d/Development/svn-workspace/arpspoof/jni/libpcap/pcap-bpf.h:

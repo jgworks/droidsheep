@@ -16,6 +16,7 @@ public interface Constants {
 	public static final String 	BUNDLE_TYPE_START 			= "START";
 	public static final String 	BUNDLE_TYPE_STOP	 		= "STOP";
 	public static final String 	BUNDLE_TYPE_NEWAUTH 		= "NEWAUTH";
+	public static final String 	BUNDLE_TYPE_LOADAUTH 		= "LOADAUTH";
 	public static final String 	BUNDLE_KEY_ID 				= "ID";
 	public static final String 	BUNDLE_KEY_MOBILE 			= "MOBILE";
 	public static final String 	BUNDLE_KEY_AUTH 			= "AUTH";

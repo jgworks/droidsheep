@@ -35,6 +35,15 @@
 				<category android:name="android.intent.category.DEFAULT" />
 			</intent-filter>
 		</activity>
+		<activity
+			android:label="@string/app_name"
+			android:configChanges="orientation|keyboardHidden"
+			android:name=".activities.UpdateActivity">
+			<intent-filter>
+				<action android:name="android.intent.action.VIEW" />
+				<category android:name="android.intent.category.DEFAULT" />
+			</intent-filter>
+		</activity>
 		<service
 			android:exported="false"
 			android:name=".services.ArpspoofService">
