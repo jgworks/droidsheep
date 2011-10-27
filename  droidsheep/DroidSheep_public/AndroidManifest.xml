@@ -2,7 +2,7 @@
 <manifest
 	xmlns:android="http://schemas.android.com/apk/res/android"
 	package="de.trier.infsec.koch.droidsheep"
-	android:versionName="13" android:versionCode="13">
+	android:versionName="15" android:versionCode="15">
 	<application
 		android:icon="@drawable/droidsheep_square"
 		android:label="DroidSheep">

@@ -119,11 +119,11 @@ public class HijackActivity extends Activity implements Constants {
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		super.onCreateOptionsMenu(menu);
-		menu.add(0, 0, 0, "Back");
-		menu.add(0, 1, 0, "Forward");
-		menu.add(1, 2, 0, "Reload");
-		menu.add(1, 3, 0, "Close Website");
-		menu.add(1, 4, 0, "Change URL");
+		menu.add(0, 0, 0, getString(R.string.back));
+		menu.add(0, 1, 0, getString(R.string.forward));
+		menu.add(1, 2, 0, getString(R.string.reload));
+		menu.add(1, 3, 0, getString(R.string.close));
+		menu.add(1, 4, 0, getString(R.string.changeurl));
 		return true;
 	}
 
@@ -154,8 +154,8 @@ public class HijackActivity extends Activity implements Constants {
 	private void selectURL() {
 		AlertDialog.Builder alert = new AlertDialog.Builder(this);
 
-		alert.setTitle("Change URL");
-		alert.setMessage("Insert custom URL to load with hijacked cookies");
+		alert.setTitle(getString(R.string.changeurl));
+		alert.setMessage(getString(R.string.customurl));
 
 		// Set an EditText view to get user input   
 		final EditText inputName = new EditText(this);

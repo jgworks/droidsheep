@@ -16,38 +16,47 @@
 	<string name="label_networkname_pref">Connected to </string>
 	<string name="label_status_connected">Network status: CONNECTED</string>
 	<string name="label_status_disconnected">Network status: DISCONNECTED</string>
+	
 	<string name="notification_title">New Session has been captured</string>
 	<string name="notification_text">Tap to open DroidSheep!</string>
+	
 	<string name="toast_wifi_lost">Wifi connection lost or changed. Stopped Listening!</string>
 	<string name="toast_process_running_text">Process already running</string>
-	<string name="menu_black_list">Add host to blacklist</string>
-	<string name="menu_save">Save cookies</string>
 	<string name="cbgeneric">Generic mode</string>
 	<string name="cbarpspoof">ARP-Spoofing</string>
+
 	<string name="installbusybox">Busybox should be installed in order to run DroidSheep properly. Do you want to install BusyBox from market?</string>
+	
+	<string name="menu_black_list">Add host to blacklist</string>
+	<string name="menu_save">Save cookies</string>
 	<string name="menu_delete">Delete saved cookies</string>
 	<string name="menu_open_mobile">Open mobile site</string>
 	<string name="menu_open_normal">Open site</string>
-	
 	<string name="menu_remove_from_list">Remove from list</string>
 	<string name="menu_choose_page_title">Choose page type:</string>
 	<string name="menu_wifilist">Choose WiFi</string>
 	<string name="menu_clear_sessionlist">Clear list</string>
 	<string name="menu_debug">Debug</string>
 	<string name="menu_export">Export via eMail</string>
-	<string name="clear_blacklist">Do you really want to delete all hosts from blacklist?</string>
 	<string name="menu_blacklist_clear">Clear Blacklist</string>
 	<string name="menu_helpforum">HELP!</string>
 	<string name="menu_donate">DONATION</string>
+	
+	<string name="clear_blacklist">Do you really want to delete all hosts from blacklist?</string>
 	<string name="button_ok">Yes</string>
 	<string name="button_abprt">Abort</string>
 	<string name="accept_text">You must accept this disclaimer in order to use DroidSheep!</string>
 	<string name="popup_exit">Do you really want to exit DroidSheep? If you want to keep it running in background press HOME button!</string>
 	<string name="popup_debug">This will start a debug session. It will start Listening and collect debug information. Let DroidSheep keep listening for some seconds (at least 30) and press "stop". An email will open which contains all debug information. No data will be sent silently!</string>
-	
 	<string name="donatetext">I hope you like DroidSheep!\n\nDroidSheep is free and open source. Nevertheless, it takes a lot of time to support DroidSheep and also some money for running www.droidsheep.de\n\nSo if you would like to appreciate this work, you are very welcome to donate some money to make this happen. \n\nThanks!</string>
 	<string name="donate_no">No, I´m not interested.</string>
 	<string name="donate_yes">Yes, your work is worth it!</string>
-	
 	<string name="updatetext">There is an update available!\nActually there is no automatic update mechanism, but you can uninstall DroidSheep and open "http://www.droidsheep.de" to grab the new version manually from the download section.\nChanges: </string>
+	
+	<string name="changeurl">change address</string>
+	<string name="customurl">choose custom URL to load with hijacked cookies</string>
+	<string name="back">BACK</string>
+	<string name="forward">FORWARD</string>
+	<string name="close">CLOSE</string>
+	<string name="reload">RELOAD</string>
 </resources>
